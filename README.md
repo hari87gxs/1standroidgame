@@ -1,21 +1,25 @@
 # Athreya's Sums - Math Workout Game
 
-A modern Android math workout game built with **Kotlin**, **Jetpack Compose**, and **MVVM architecture**. This app is designed as a learning project for Android development newcomers, featuring comprehensive comments and modern Android development practices.
+A modern Android math workout game built with **Kotlin**, **Jetpack Compose**, and **MVVM architecture**. Features both mathematical problem-solving and logic puzzles including a complete **Sudoku game mode**. This app is designed as a learning project for Android development newcomers, featuring comprehensive comments and modern Android development practices.
 
 ## 🎯 Features
 
-- **Four Game Modes:**
+- **Five Game Modes:**
   - Addition & Subtraction
   - Multiplication & Division
   - Test Me (Mixed operations)
   - Brain Teaser (Multi-step problems)
+  - 🧩 **Sudoku Puzzles** (NEW!)
 
-- **Three Difficulty Levels:**
-  - Easy (1-10)
-  - Medium (1-100) 
-  - Complex (1-1000)
+- **Sudoku Features:**
+  - Auto-generated puzzles with multiple difficulty levels
+  - Note-taking functionality for solving strategies
+  - Undo/Redo system and hint system
+  - Real-time progress tracking and timer
+  - Professional grid interface with conflict detection
 
-- **Game Features:**
+- **Math Game Features:**
+  - Three Difficulty Levels: Easy (1-10), Medium (1-100), Complex (1-1000)
   - Customizable question count (10, 20, 50)
   - Real-time timer and scoring
   - Wrong answer penalty system
