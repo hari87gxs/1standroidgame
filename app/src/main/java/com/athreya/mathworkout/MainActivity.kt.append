@@ -1,0 +1,28 @@
+
+        // Daily Challenge Screen
+        composable(Screen.DailyChallenge.route) {
+            val uiState by dailyChallengeViewModel.uiState.collectAsState()
+            DailyChallengeScreen(
+                todaysChallenge = uiState.todaysChallenge,
+                completedChallenges = uiState.completedChallenges,
+                onStartChallenge = { challenge ->
+                    // Navigate to game screen with daily challenge mode
+                    val gameMode = when (challenge.gameMode) {
+                        "Addition", "Subtraction" -> GameMode.ADDITION_SUBTRACTION
+                        "Multiplication", "Division" -> GameMode.MULTIPLICATION_DIVISION
+                        "TestMe" -> GameMode.TEST_ME
+                        "BrainTeaser" -> GameMode.BRAIN_TEASER
+                        "Sudoku" -> GameMode.SUDOKU
+                        else -> GameMode.TEST_ME
+                    }
+                    if (gameMode == GameMode.SUDOKU) {
+                        navController.navigate(Screen.Sudoku.route)
+                    } else {
+                        navController.navigate(Screen.Game.createRoute(gameMode))
+                    }
+                },
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
+        }

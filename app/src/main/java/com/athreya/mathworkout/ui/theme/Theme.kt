@@ -49,35 +49,40 @@ private val DarkColorScheme = darkColorScheme(
  * AthreyasSumsTheme - The main theme composable for the app.
  * 
  * This composable applies the appropriate color scheme and typography
- * based on the system theme and Android version.
+ * based on the selected theme.
  * 
- * @param darkTheme Whether to use dark theme. Defaults to system preference.
- * @param dynamicColor Whether to use dynamic color (Android 12+). Defaults to true.
+ * @param themeId The ID of the theme to use. Defaults to "default".
  * @param content The content to apply the theme to.
  */
 @Composable
 fun AthreyasSumsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    themeId: String = "default",
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val theme = Themes.getThemeById(themeId)
+    
+    val colorScheme = lightColorScheme(
+        primary = theme.primaryColor,
+        onPrimary = theme.onPrimaryColor,
+        secondary = theme.secondaryColor,
+        onSecondary = theme.onSecondaryColor,
+        tertiary = theme.tertiaryColor,
+        background = theme.backgroundColor,
+        onBackground = theme.onBackgroundColor,
+        surface = theme.surfaceColor,
+        onSurface = theme.onSurfaceColor,
+        surfaceVariant = theme.surfaceColor,
+        onSurfaceVariant = theme.onSurfaceColor,
+        error = theme.errorColor
+    )
     
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = theme.primaryColor.toArgb()
+            val isDark = theme.backgroundColor.luminance() < 0.5f
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
         }
     }
 
@@ -86,4 +91,11 @@ fun AthreyasSumsTheme(
         typography = Typography,
         content = content
     )
+}
+
+/**
+ * Helper extension to calculate luminance of a color
+ */
+private fun Color.luminance(): Float {
+    return (0.299f * red + 0.587f * green + 0.114f * blue)
 }

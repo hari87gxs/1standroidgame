@@ -292,14 +292,20 @@ private fun HighScoreItem(
                 }
             }
             
-            // Time and details
+            // Score and details
             Column(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = formatTime(highScore.timeTaken),
+                    text = "${highScore.finalScore} pts",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = formatTime(highScore.timeTaken),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (highScore.wrongAttempts > 0) {
                     Text(
@@ -308,11 +314,13 @@ private fun HighScoreItem(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                Text(
-                    text = formatDate(highScore.timestamp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (highScore.bonusMultiplier > 1.0f) {
+                    Text(
+                        text = "${highScore.bonusMultiplier}x bonus",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
             }
         }
     }

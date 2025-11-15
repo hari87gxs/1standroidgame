@@ -1,8 +1,10 @@
 package com.athreya.mathworkout.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -35,6 +37,9 @@ import com.athreya.mathworkout.viewmodel.SettingsViewModel
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
+    onThemesClick: () -> Unit = {},
+    onAchievementsClick: () -> Unit = {},
+    achievementManager: com.athreya.mathworkout.data.AchievementManager? = null,
     viewModel: SettingsViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -62,9 +67,100 @@ fun SettingsScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // Themes Button Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Button(
+                    onClick = onThemesClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "🎨 Customize Theme",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            
+            // Achievements Button Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Button(
+                    onClick = onAchievementsClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "🏆 View Achievements",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            
+            // Reset Achievements Button (for testing)
+            if (achievementManager != null) {
+                var showResetDialog by remember { mutableStateOf(false) }
+                
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Button(
+                        onClick = { showResetDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text(
+                            text = "🔄 Reset All Achievements (Testing)",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                
+                if (showResetDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showResetDialog = false },
+                        title = { Text("Reset All Achievements?") },
+                        text = { Text("This will reset all your achievements and statistics. This action cannot be undone.") },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    achievementManager.resetAllAchievements()
+                                    showResetDialog = false
+                                }
+                            ) {
+                                Text("Reset")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showResetDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+            }
+            
             // Difficulty Selection Section
             SettingsSection(title = "Difficulty") {
                 // selectableGroup() for accessibility - screen readers understand this is a group
@@ -137,6 +233,174 @@ fun SettingsScreen(
                             )
                         }
                     }
+                }
+            }
+            
+            // Scoring System Information Section
+            SettingsSection(title = "Scoring System") {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Complete Scoring Formula:",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "1. Base Points = Correct × Difficulty",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "2. Points with Speed = Base × Time Multiplier",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "3. Points after Penalties = Speed Points - (Errors × 5)",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "4. Final Score = Penalty Points × Streak Multiplier",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                    
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
+                    
+                    Text(
+                        text = "Breakdown:",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                    
+                    Text(
+                        text = "• Difficulty Points:",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "  - Easy: 10 pts/question",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "  - Medium: 20 pts/question",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "  - Hard: 30 pts/question",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    
+                    Text(
+                        text = "• Time Multiplier (based on total game time):",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Text(
+                        text = "  - ≤1s per question: 3× multiplier",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "    (e.g., ≤10s for 10 questions, ≤20s for 20 questions)",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "  - ≤1.2s per question: 2× multiplier",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "    (e.g., ≤12s for 10 questions, ≤24s for 20 questions)",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "  - >1.2s per question: 1× multiplier",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    
+                    Text(
+                        text = "• Penalties: -5 points per wrong answer",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    
+                    Text(
+                        text = "Daily Challenge Streak Bonuses:",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                    
+                    Text(
+                        text = "Complete the daily challenge to unlock streak bonuses for ALL games!",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    Text(
+                        text = "• 3+ day streak: 1.5× multiplier",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "• 7+ day streak: 2.0× multiplier",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "• 14+ day streak: 2.5× multiplier",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "• 30+ day streak: 3.0× multiplier",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Text(
+                        text = "💡 Tip: Build your daily streak to get bonus multipliers on every game you play!",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }

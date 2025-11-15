@@ -1,0 +1,15 @@
+package com.athreya.mathworkout
+
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+/**
+ * Application class annotated with @HiltAndroidApp.
+ * 
+ * This annotation triggers Hilt's code generation, including a base class
+ * for your application that serves as the application-level dependency container.
+ * 
+ * This must be specified in AndroidManifest.xml as the application name.
+ */
+@HiltAndroidApp
+class MathWorkoutApplication : Application()

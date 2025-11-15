@@ -31,7 +31,8 @@ data class GameUiState(
     val gameCompleted: Boolean = false, // Flag to track if game finished properly
     val gameSessionId: String = "", // Unique ID for this game session
     val gameMode: GameMode = GameMode.ADDITION_SUBTRACTION,
-    val difficulty: Difficulty = Difficulty.EASY
+    val difficulty: Difficulty = Difficulty.EASY,
+    val isDailyChallenge: Boolean = false // Track if this is a daily challenge
 )
 
 /**
@@ -60,8 +61,9 @@ class GameViewModel(
      * This should be called when navigating to the GameScreen.
      * 
      * @param gameMode The type of math problems to generate
+     * @param isDailyChallenge Whether this is a daily challenge game
      */
-    fun initializeGame(gameMode: GameMode) {
+    fun initializeGame(gameMode: GameMode, isDailyChallenge: Boolean = false) {
         viewModelScope.launch {
             try {
                 // Reset game state completely for a fresh start
@@ -80,7 +82,8 @@ class GameViewModel(
                     gameStartTime = System.currentTimeMillis(),
                     gameSessionId = System.currentTimeMillis().toString(), // Unique session ID
                     isGameActive = true,
-                    isLoading = false
+                    isLoading = false,
+                    isDailyChallenge = isDailyChallenge
                 )
                 
                 // Generate the first question

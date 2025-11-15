@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829987409424",
+    "project_id": "athreyas-math-workout",
+    "storage_bucket": "athreyas-math-workout.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829987409424:android:0d55c3bcc27abe04a38495",
+        "android_client_info": {
+          "package_name": "com.athreya.mathworkout"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCV4FM-tZ8MLZdJKWYt231QS55Yo-hkLu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

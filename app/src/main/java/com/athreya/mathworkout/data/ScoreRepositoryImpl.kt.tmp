@@ -1,0 +1,201 @@
+package com.athreya.mathworkout.data
+
+import android.content.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Implementation of ScoreRepository that handles both local and cloud operations.
+ * This class follows the offline-first approach:
+ * 1. Always save to local database first
+ * 2. Attempt to sync to cloud when online
+ * 3. Provide local data immediately, update with cloud data when available
+ * 
+ * @param highScoreDao Room DAO for local database operations
+ * @param firebaseService Firebase service for cloud operations
+ * @param context Android context for device ID generation
+ */
+@Singleton
+class ScoreRepositoryImpl @Inject constructor(
+    private val highScoreDao: HighScoreDao,
+    private val firebaseService: FirebaseScoreService,
+    private val context: Context
+) : ScoreRepository {
+    
+    // ==================== LOCAL OPERATIONS ====================
+    
+    override fun getLocalHighScores(): Flow<List<HighScore>> {
+        return highScoreDao.getAllHighScores()
+    }
+    
+    override fun getLocalHighScoresByGameMode(gameMode: String): Flow<List<HighScore>> {
+        return highScoreDao.getHighScoresByGameMode(gameMode)
+    }
+    
+    override fun getLocalHighScoresByDifficulty(difficulty: String): Flow<List<HighScore>> {
+        return highScoreDao.getHighScoresByDifficulty(difficulty)
+    }
+    
+    override suspend fun insertHighScore(highScore: HighScore, syncToCloud: Boolean): Long {
+        // Always save to local database first
+        val localId = highScoreDao.insertHighScore(highScore)
+        
+        // Attempt to sync to cloud if requested and online
+        if (syncToCloud && firebaseService.isNetworkAvailable()) {
+            try {
+                val firebaseScore = FirebaseHighScore.fromHighScore(highScore)
+                val result = firebaseService.submitScore(firebaseScore)
+                
+                if (result.isSuccess) {
+                    // Update local record with Firebase ID and mark as synced
+                    val documentId = result.getOrNull()
+                    if (documentId != null) {
+                        val updatedScore = highScore.copy(
+                            id = localId,
+                            firebaseId = documentId,
+                            synced = true
+                        )
+                        highScoreDao.updateHighScore(updatedScore)
+                    }
+                }
+            } catch (e: Exception) {
+                // Sync failed, but local save succeeded - score will be synced later
+                // Log error but don't throw to avoid disrupting user experience
+            }
+        }
+        
+        return localId
+    }
+    
+    // ==================== GLOBAL OPERATIONS ====================
+    
+    override suspend fun getGlobalLeaderboard(
+        limit: Int,
+        gameMode: String?,
+        difficulty: String?
+    ): Result<List<HighScore>> {
+        return try {
+            val result = firebaseService.getGlobalLeaderboard(limit, gameMode, difficulty)
+            
+            if (result.isSuccess) {
+                val firebaseScores = result.getOrThrow()
+                val highScores = firebaseScores.map { FirebaseHighScore.toHighScore(it) }
+                Result.success(highScores)
+            } else {
+                result.map { emptyList<HighScore>() }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun getPlayerGlobalRank(
+        deviceId: String,
+        gameMode: String?,
+        difficulty: String?
+    ): Result<Int> {
+        return firebaseService.getPlayerRank(deviceId, gameMode, difficulty)
+    }
+    
+    override suspend fun submitToGlobalLeaderboard(highScore: HighScore): Result<String> {
+        return try {
+            val firebaseScore = FirebaseHighScore.fromHighScore(highScore)
+            val result = firebaseService.submitScore(firebaseScore)
+            
+            if (result.isSuccess) {
+                // Update local record to mark as synced
+                val documentId = result.getOrNull()
+                if (documentId != null && highScore.id > 0) {
+                    val updatedScore = highScore.copy(
+                        firebaseId = documentId,
+                        synced = true
+                    )
+                    highScoreDao.updateHighScore(updatedScore)
+                }
+            }
+            
+            result
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    // ==================== SYNC OPERATIONS ====================
+    
+    override suspend fun syncUnsyncedScores(): Result<Int> {
+        return try {
+            if (!firebaseService.isNetworkAvailable()) {
+                return Result.failure(Exception("No internet connection"))
+            }
+            
+            // Get all unsynced scores
+            val unsyncedScores = highScoreDao.getUnsyncedScores().first()
+            var syncedCount = 0
+            
+            for (score in unsyncedScores) {
+                if (score.isGlobal) { // Only sync scores marked for global leaderboard
+                    try {
+                        val firebaseScore = FirebaseHighScore.fromHighScore(score)
+                        val result = firebaseService.submitScore(firebaseScore)
+                        
+                        if (result.isSuccess) {
+                            val documentId = result.getOrNull()
+                            if (documentId != null) {
+                                val updatedScore = score.copy(
+                                    firebaseId = documentId,
+                                    synced = true
+                                )
+                                highScoreDao.updateHighScore(updatedScore)
+                                syncedCount++
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Continue with next score if one fails
+                        continue
+                    }
+                }
+            }
+            
+            Result.success(syncedCount)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun isOnline(): Boolean {
+        return firebaseService.isNetworkAvailable()
+    }
+    
+    override suspend fun getSyncStatus(): SyncStatus {
+        val unsyncedCount = highScoreDao.getUnsyncedScores().first().size
+        val lastSyncTime = getLastSyncTime() // You might want to store this in preferences
+        
+        return SyncStatus(
+            pendingSyncs = unsyncedCount,
+            lastSyncTime = lastSyncTime,
+            isOnline = firebaseService.isNetworkAvailable(),
+            syncInProgress = false // You might want to track this with a state variable
+        )
+    }
+    
+    /**
+     * Get device ID for player identification
+     * Uses Android ID as a unique identifier for this device
+     */
+    fun getDeviceId(): String {
+        return android.provider.Settings.Secure.getString(
+            context.contentResolver,
+            android.provider.Settings.Secure.ANDROID_ID
+        ) ?: "unknown_device"
+    }
+    
+    /**
+     * Get last sync timestamp (placeholder - implement with SharedPreferences or DataStore)
+     */
+    private suspend fun getLastSyncTime(): Long? {
+        // TODO: Implement with SharedPreferences or DataStore
+        return null
+    }
+}

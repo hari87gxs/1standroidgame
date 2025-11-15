@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -12,8 +14,8 @@ android {
         applicationId = "com.athreya.mathworkout"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.7"
+        versionCode = 12
+        versionName = "2.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -83,6 +85,7 @@ dependencies {
     
     // ViewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     
     // Room database
     implementation("androidx.room:room-runtime:2.6.0")
@@ -97,6 +100,26 @@ dependencies {
     
     // Material Icons Extended
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    
+    // Networking
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    
+    // Kotlin Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    
+    // Firebase - for global leaderboard
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    
+    // TODO: Re-enable Hilt later  
+    // implementation("com.google.dagger:hilt-android:2.44")
+    // ksp("com.google.dagger:hilt-compiler:2.44")
+    // implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
