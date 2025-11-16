@@ -1,53 +1,558 @@
-# Athreya's Sums - Math Workout Game
+# Athreya's Math Workout 🧮
 
-A modern Android math workout game built with **Kotlin**, **Jetpack Compose**, and **MVVM architecture**. Features both mathematical problem-solving and logic puzzles including a complete **Sudoku game mode**. This app is designed as a learning project for Android development newcomers, featuring comprehensive comments and modern Android development practices.
+A comprehensive Android math training application built with **Kotlin**, **Jetpack Compose**, and modern **Android architecture**. Transform mental math practice into an exciting adventure with achievements, themes, daily challenges, and global competition!
 
-## 🎯 Features
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)](https://kotlinlang.org)
+[![Compose](https://img.shields.io/badge/Compose-1.5.0-green.svg)](https://developer.android.com/jetpack/compose)
+[![Firebase](https://img.shields.io/badge/Firebase-Integrated-orange.svg)](https://firebase.google.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-- **Five Game Modes:**
-  - Addition & Subtraction
-  - Multiplication & Division
-  - Test Me (Mixed operations)
-  - Brain Teaser (Multi-step problems)
-  - 🧩 **Sudoku Puzzles** (NEW!)
+A feature-rich math workout app designed for students, professionals, and math enthusiasts. Features achievements, unlockable themes, daily challenges, social features, and global leaderboards - all wrapped in a beautiful, customizable interface.
 
-- **Sudoku Features:**
-  - Auto-generated puzzles with multiple difficulty levels
-  - Note-taking functionality for solving strategies
-  - Undo/Redo system and hint system
-  - Real-time progress tracking and timer
-  - Professional grid interface with conflict detection
+## 📱 Screenshots
 
-- **Math Game Features:**
-  - Three Difficulty Levels: Easy (1-10), Medium (1-100), Complex (1-1000)
-  - Customizable question count (10, 20, 50)
-  - Real-time timer and scoring
-  - Wrong answer penalty system
-  - High score tracking with Room database
-  - Persistent settings with DataStore
+[Add screenshots here showing: Home Screen, Game Screen, Achievements, Themes, Daily Challenges, Leaderboard]
 
-## 🏗️ Architecture
+---
 
-This app follows **Model-View-ViewModel (MVVM)** architecture with modern Android development practices:
+## ✨ Key Features
+
+### 🎮 Game Modes
+- **Quick Play** - Jump straight into action with customizable difficulty
+- **Practice Mode** - Perfect your skills at your own pace  
+- **Daily Challenges** - Fresh math problems every 24 hours with streak tracking
+- **Timed Sessions** - Race against the clock for maximum scores
+- **Custom Difficulty** - Easy, Medium, Hard, and Expert levels
+
+### 🏆 Achievement System
+- **10+ Unique Achievements** to unlock through gameplay
+- **5-Tier Rank System**: Beginner → Amateur → Expert → Master → Grandmaster
+- **Progress Tracking** with detailed statistics
+- **Achievement Types**:
+  - 🎯 Quick Learner - Complete your first game
+  - ⚡ Speed Demon - Complete 30+ games with 3× time multiplier
+  - 💯 Perfect Score - Achieve 5 perfect games (no errors)
+  - 🔥 Streak Master - Maintain a 7-day login streak
+  - 🎖️ Veteran Player - Complete 50 total games
+  - 🏅 High Scorer - Score 10,000+ in a single game
+  - 👑 Point Collector - Accumulate 50,000 total points
+  - 🎓 Challenge Champion - Win 10 daily challenges
+  - And more!
+
+### 🎨 Beautiful Themes
+- **7 Stunning Themes** including Dark Mode
+- **Unlockable Themes**:
+  - 🦸 **Marvel Theme** - Unlock by scoring 10,000+ in a single game
+  - 🦇 **DC Theme** - Unlock by completing 50 games
+  - 💡 **Neon Theme** - Unlock with 30+ speed games (3× multiplier)
+  - 🌊 **Ocean Theme** - Unlock by maintaining a 7-day streak
+  - 🌅 **Sunset Theme** - Unlock by earning 5,000 total points
+- **Dynamic Color Schemes** that adapt to each theme
+- **Persistent Theme Selection** across app sessions
+
+### 📊 Comprehensive Statistics
+- Track **total games played** and **perfect scores**
+- Monitor **current streak** and **high scores**
+- View **rank progression** and **total points**
+- **Detailed performance analytics**
+- **Achievement progress tracking** with visual indicators
+- **Historical data** for all game sessions
+
+### 🌍 Global Competition
+- **Firebase-powered global leaderboard**
+- Compete with players **worldwide**
+- **Real-time score updates** and rankings
+- View **top 100 performers**
+- Track your **global ranking**
+- **Country-based filtering** (coming soon)
+
+### 👥 Social Features
+- **Create and join math challenge groups**
+- Compete with **friends and family**
+- **Group leaderboards** for private competition
+- **Send and receive challenges** to other players
+- **Share achievements** and scores
+- **Multiplayer game modes** (coming soon)
+
+### ⏰ Daily Challenges
+- **New challenges every day** at midnight
+- **Special rewards** for completion
+- **Limited-time bonuses** and multipliers
+- **Streak tracking** for consecutive days
+- **Daily leaderboard** to climb
+- **Challenge history** tracking
+
+### 🎯 Smart Learning
+- **Adaptive difficulty** based on performance
+- Focus on areas needing improvement
+- **Instant feedback** on answers
+- Track **wrong answers** to learn from mistakes
+- **Progressive skill development**
+- **Time-based multipliers** for advanced players
+
+### ⚡ Game Features
+- **Time multipliers** for bonus points (1.5×, 2×, 3×)
+- **Clean, intuitive interface** with Material Design 3
+- **Smooth animations** and confetti celebrations
+- **Offline mode** available for local play
+- **No intrusive ads** during gameplay
+- **Multiple operation types**: Addition, Subtraction, Multiplication, Division, Mixed
+
+### 📈 Progress Tracking
+- **Detailed game history** with timestamps
+- **High score records** per difficulty level
+- **Personal best tracking** across all modes
+- **Challenge completion stats**
+- **Weekly and monthly reports** (coming soon)
+- **Export data** functionality (coming soon)
+
+### 🎁 Rewards & Unlockables
+- Unlock **themes through achievements**
+- Earn **points for every game**
+- **Rank up system** with visual badges
+- **Special rewards** for milestones
+- **Collectible achievement badges**
+- **Custom app icons** (coming soon)
+
+---
+
+## 🏗️ Technical Architecture
 
 ### Technology Stack
-- **Language:** Kotlin
-- **UI:** Jetpack Compose (100% declarative UI)
-- **Architecture:** MVVM with Repository pattern
-- **Database:** Room (SQLite abstraction)
-- **Settings:** DataStore (modern SharedPreferences replacement)
-- **Navigation:** Compose Navigation
-- **State Management:** StateFlow and Compose State
-- **Dependency Injection:** Manual DI (production apps use Dagger/Hilt)
+- **Language**: Kotlin 1.9.0
+- **UI Framework**: Jetpack Compose (100% declarative UI)
+- **Architecture**: MVVM with Repository Pattern
+- **Database**: Room (SQLite abstraction)
+- **Settings**: SharedPreferences & DataStore
+- **Backend**: Firebase (Firestore, Authentication)
+- **Navigation**: Compose Navigation
+- **State Management**: StateFlow, MutableState
+- **Dependency Injection**: Manual DI (ViewModelFactory)
+- **Coroutines**: Kotlin Coroutines for async operations
+- **Material Design**: Material 3 components
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        UI Layer                          │
+│  (Compose Screens, ViewModels, Navigation)              │
+├─────────────────────────────────────────────────────────┤
+│                    Domain Layer                          │
+│  (Use Cases, Business Logic, Data Models)                │
+├─────────────────────────────────────────────────────────┤
+│                     Data Layer                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │   Local DB   │  │   Firebase   │  │ Preferences  │  │
+│  │   (Room)     │  │  (Firestore) │  │  (DataStore) │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
 
 ### Project Structure
 ```
 app/src/main/java/com/athreya/mathworkout/
-├── data/                          # Data layer
-│   ├── AppDatabase.kt             # Room database setup
-│   ├── GameSettings.kt            # Settings data classes & enums
-│   ├── HighScore.kt              # High score entity
-│   ├── HighScoreDao.kt           # Database access object
+├── data/                               # Data layer
+│   ├── AppDatabase.kt                  # Room database configuration
+│   ├── GameSettings.kt                 # Game settings data models
+│   ├── HighScore.kt                    # High score entity
+│   ├── HighScoreDao.kt                 # Local database queries
+│   ├── Achievement.kt                  # Achievement data models
+│   ├── AchievementManager.kt           # Achievement logic & tracking
+│   ├── Rank.kt                         # Rank system definitions
+│   ├── ThemePreferencesManager.kt      # Theme selection persistence
+│   ├── UserPreferencesManager.kt       # User settings management
+│   ├── DailyChallenge.kt              # Daily challenge models
+│   ├── DailyStreak.kt                 # Streak tracking
+│   ├── FirebaseScoreService.kt        # Firebase integration
+│   ├── ScoreRepository.kt             # Score data abstraction
+│   ├── network/                       # Network layer
+│   │   ├── GlobalScoreApiService.kt   # API definitions
+│   │   └── GlobalScoreModels.kt       # Network models
+│   ├── repository/                    # Repository implementations
+│   │   ├── ChallengeRepository.kt
+│   │   ├── GroupRepository.kt
+│   │   └── GlobalScoreRepository.kt
+│   └── social/                        # Social features
+│       ├── Group.kt                   # Group models
+│       ├── GroupDao.kt                # Group database queries
+│       ├── GroupFirebaseService.kt    # Firebase group sync
+│       ├── Challenge.kt               # Challenge models
+│       ├── ChallengeDao.kt            # Challenge queries
+│       └── SocialSyncManager.kt       # Social data sync
+│
+├── ui/                                # UI layer
+│   ├── screens/                       # Screen composables
+│   │   ├── HomeScreen.kt             # Main menu with rank badge
+│   │   ├── GameScreen.kt             # Math problem gameplay
+│   │   ├── ResultsScreen.kt          # Game results with confetti
+│   │   ├── SettingsScreen.kt         # App settings & preferences
+│   │   ├── HighScoreScreen.kt        # Local high scores
+│   │   ├── AchievementsScreen.kt     # Achievement tracking UI
+│   │   ├── ThemeSelectorScreen.kt    # Theme customization
+│   │   ├── DailyChallengeScreen.kt   # Daily challenges
+│   │   ├── GlobalScoreScreen.kt      # Global leaderboard
+│   │   ├── GroupsScreen.kt           # Social groups
+│   │   ├── GroupDetailScreen.kt      # Group details & members
+│   │   ├── ChallengesScreen.kt       # Challenge management
+│   │   └── GlobalLeaderboardScreen.kt # Top global scores
+│   │
+│   ├── components/                    # Reusable UI components
+│   │   ├── Animations.kt             # Animation utilities
+│   │   ├── ConfettiAnimation.kt      # Confetti particle system
+│   │   ├── AchievementNotifications.kt # Achievement popups
+│   │   ├── AnimatedCounter.kt        # Animated number displays
+│   │   ├── ProgressIndicators.kt     # Custom progress bars
+│   │   ├── PlayerNameDialog.kt       # User input dialogs
+│   │   ├── UserRegistrationDialog.kt # User registration
+│   │   └── CreateChallengeDialog.kt  # Challenge creation
+│   │
+│   └── theme/                        # Theming system
+│       ├── AppTheme.kt               # 7 theme definitions
+│       ├── Theme.kt                  # Theme configuration
+│       ├── Color.kt                  # Color palettes
+│       └── Type.kt                   # Typography system
+│
+├── viewmodel/                        # ViewModels
+│   ├── GameViewModel.kt              # Game state management
+│   ├── SettingsViewModel.kt          # Settings state
+│   ├── HighScoreViewModel.kt         # High score logic
+│   ├── HomeViewModel.kt              # Home screen state
+│   ├── DailyChallengeViewModel.kt    # Daily challenge logic
+│   ├── GlobalScoreViewModel.kt       # Global score state
+│   ├── GlobalLeaderboardViewModel.kt # Leaderboard logic
+│   ├── GroupViewModel.kt             # Group management
+│   ├── ChallengeViewModel.kt         # Challenge state
+│   └── ViewModelFactory.kt           # ViewModel creation
+│
+├── navigation/                       # Navigation
+│   └── Screen.kt                     # Navigation routes & setup
+│
+└── MainActivity.kt                   # App entry point & navigation graph
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Android Studio Hedgehog (2023.1.1) or later
+- JDK 17 or higher
+- Android SDK 34 (targetSdk)
+- Minimum Android 7.0 (API 24)
+- Firebase project (for online features)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/hari87gxs/1standroidgame.git
+   cd 1standroidgame
+   ```
+
+2. **Open in Android Studio**
+   - File → Open → Select project directory
+   - Wait for Gradle sync to complete
+
+3. **Firebase Setup** (Required for online features)
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
+   - Add an Android app to your Firebase project
+   - Download `google-services.json`
+   - Place it in `app/` directory
+   - Enable Firestore Database and Authentication
+
+4. **Build and Run**
+   ```bash
+   ./gradlew assembleDebug
+   ```
+   Or use Android Studio's Run button (▶️)
+
+### Firebase Configuration
+
+1. **Firestore Rules** (Deploy using `deploy_firestore_index.sh`)
+   ```javascript
+   // See firestore.rules for complete configuration
+   ```
+
+2. **Firestore Indexes** (Auto-deployed)
+   ```json
+   // See firestore.indexes.json
+   ```
+
+3. **Authentication**
+   - Enable Anonymous Authentication in Firebase Console
+   - No additional configuration needed
+
+---
+
+## 📦 Dependencies
+
+### Core Android
+```gradle
+// Jetpack Compose
+implementation "androidx.compose.ui:ui:1.5.4"
+implementation "androidx.compose.material3:material3:1.1.2"
+implementation "androidx.compose.ui:ui-tooling-preview:1.5.4"
+implementation "androidx.activity:activity-compose:1.8.1"
+implementation "androidx.navigation:navigation-compose:2.7.5"
+
+// Room Database
+implementation "androidx.room:room-runtime:2.6.0"
+implementation "androidx.room:room-ktx:2.6.0"
+kapt "androidx.room:room-compiler:2.6.0"
+
+// DataStore
+implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+// Lifecycle & ViewModel
+implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
+implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.2"
+
+// Coroutines
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+```
+
+### Firebase
+```gradle
+// Firebase Platform
+implementation platform("com.google.firebase:firebase-bom:32.5.0")
+implementation "com.google.firebase:firebase-firestore-ktx"
+implementation "com.google.firebase:firebase-auth-ktx"
+implementation "com.google.firebase:firebase-analytics-ktx"
+```
+
+### Other Libraries
+```gradle
+// Gson for JSON parsing
+implementation "com.google.code.gson:gson:2.10.1"
+
+// Material Icons Extended
+implementation "androidx.compose.material:material-icons-extended:1.5.4"
+```
+
+---
+
+## 🎮 How to Play
+
+### Quick Start
+1. **Launch the app** and see your current rank badge on the home screen
+2. **Select a game mode**: Quick Play, Practice, or Daily Challenge
+3. **Choose difficulty**: Easy, Medium, Hard, or Expert
+4. **Solve math problems** as quickly and accurately as possible
+5. **Earn points** based on speed and accuracy
+6. **Unlock achievements** and new themes as you progress!
+
+### Earning Points
+- **Base Points**: Correct answer = 10 points
+- **Time Multipliers**:
+  - ⚡ 1.5× multiplier: Answer within 5 seconds
+  - ⚡⚡ 2× multiplier: Answer within 3 seconds  
+  - ⚡⚡⚡ 3× multiplier: Answer within 2 seconds
+- **Penalties**: Wrong answer = -5 points
+- **Bonus**: Perfect game (no errors) = 50 bonus points
+
+### Unlocking Themes
+- **Marvel**: Score 10,000+ in a single game
+- **DC**: Complete 50 total games
+- **Neon**: Complete 30+ games with 3× time multiplier
+- **Ocean**: Maintain a 7-day login streak
+- **Sunset**: Accumulate 5,000 total points
+
+### Ranking Up
+- **Beginner** (🌱): 0 - 999 points
+- **Amateur** (📚): 1,000 - 4,999 points
+- **Expert** (🎓): 5,000 - 14,999 points
+- **Master** (⚡): 15,000 - 49,999 points
+- **Grandmaster** (👑): 50,000+ points
+
+---
+
+## 🔧 Configuration
+
+### App Settings
+Access via Settings screen:
+- **Difficulty**: Easy (1-10), Medium (1-100), Hard (1-1000), Expert (1-10000)
+- **Question Count**: 10, 20, or 50 questions per game
+- **Operations**: Addition, Subtraction, Multiplication, Division, Mixed
+- **Theme**: Choose from unlocked themes
+- **Achievements**: View progress and unlock status
+
+### Reset Achievements (Testing)
+- Go to Settings → Scroll down
+- Tap "🔄 Reset All Achievements (Testing)"
+- Confirm reset
+- All achievements and statistics will be cleared
+
+---
+
+## 🧪 Testing
+
+### Manual Testing
+1. **Achievement Testing**:
+   - Reset achievements in Settings
+   - Play games to trigger unlocks
+   - Verify notifications appear (currently disabled)
+   - Check Achievements screen for progress
+
+2. **Theme Testing**:
+   - Complete achievement requirements
+   - Verify themes unlock automatically
+   - Test theme switching in Settings
+   - Ensure theme persists across app restarts
+
+3. **Daily Challenge Testing**:
+   - Complete a daily challenge
+   - Verify streak increments
+   - Check leaderboard updates
+   - Test challenge expiration (24 hours)
+
+### Unit Testing (Coming Soon)
+- ViewModel tests
+- Repository tests  
+- Use case tests
+- Database migration tests
+
+---
+
+## 🛠️ Development
+
+### Code Style
+- Follow [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)
+- Use meaningful variable and function names
+- Add KDoc comments for public APIs
+- Keep functions small and focused
+- Use dependency injection
+
+### Git Workflow
+```bash
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Make changes and commit
+git add .
+git commit -m "Add: descriptive commit message"
+
+# Push to GitHub
+git push origin feature/your-feature-name
+
+# Create Pull Request on GitHub
+```
+
+### Building Release APK
+```bash
+# Generate signed release build
+./gradlew assembleRelease
+
+# APK location
+app/release/app-release.apk
+```
+
+### Keystore Configuration
+See `KEYSTORE_CREATION_STEPS.md` for signing key setup.
+
+---
+
+## 📚 Documentation
+
+- **[Architecture Documentation](ARCHITECTURE.md)** - Detailed technical architecture
+- **[Play Store Guide](PLAYSTORE_UPDATE_GUIDE.md)** - Publishing instructions
+- **[Closed Testing Guide](PLAYSTORE_CLOSED_TESTING_UPDATE.md)** - Testing phase updates
+- **[Firebase Setup](FIRESTORE_INDEX_GUIDE.md)** - Firebase configuration
+- **[Feature Documentation](NEW_FEATURES_IMPLEMENTATION.md)** - Implementation details
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
+
+### Contribution Ideas
+- [ ] Add more achievement types
+- [ ] Create new theme color schemes
+- [ ] Implement sound effects and music
+- [ ] Add accessibility features
+- [ ] Improve animations
+- [ ] Add more game modes (fractions, percentages, etc.)
+- [ ] Create widget for quick challenges
+- [ ] Add Apple Watch support
+- [ ] Implement voice control
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Harikrishnan Raguraman**
+- GitHub: [@hari87gxs](https://github.com/hari87gxs)
+- Repository: [1standroidgame](https://github.com/hari87gxs/1standroidgame)
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with [Jetpack Compose](https://developer.android.com/jetpack/compose)
+- Icons from [Material Icons](https://fonts.google.com/icons)
+- Backend powered by [Firebase](https://firebase.google.com)
+- Inspired by mental math training techniques
+- Thanks to the Android developer community
+
+---
+
+## 📊 Project Status
+
+**Current Version**: 2.0.0 (Major Update)  
+**Status**: Active Development  
+**Play Store**: Closed Testing  
+
+### Recent Updates (November 2024)
+✅ Achievement system with ranks and badges  
+✅ 7 beautiful themes (5 unlockable)  
+✅ Enhanced statistics dashboard  
+✅ Daily challenge system  
+✅ Social features (groups & challenges)  
+✅ Global Firebase leaderboard  
+✅ Improved user interface  
+✅ Performance optimizations  
+
+### Upcoming Features
+🔜 Achievement unlock animations (bug fix)  
+🔜 Sound effects and music  
+🔜 More game modes (fractions, algebra)  
+🔜 Widget support  
+🔜 Tablet optimization  
+🔜 Wear OS support  
+
+---
+
+## 📞 Support
+
+Having issues? Check these resources:
+
+1. **[Documentation](ARCHITECTURE.md)** - Comprehensive technical guide
+2. **[GitHub Issues](https://github.com/hari87gxs/1standroidgame/issues)** - Report bugs
+3. **[Discussions](https://github.com/hari87gxs/1standroidgame/discussions)** - Ask questions
+
+---
+
+## ⭐ Show Your Support
+
+Give a ⭐️ if this project helped you learn Android development!
+
+---
+
+**Made with ❤️ and Kotlin**
+
 │   └── SettingsManager.kt        # DataStore settings manager
 ├── game/                          # Game logic
 │   └── QuestionGenerator.kt       # Math question generation
