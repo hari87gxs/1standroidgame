@@ -37,7 +37,8 @@ fun ThemeSelectorScreen(
 ) {
     val context = LocalContext.current
     val themeManager = remember { ThemePreferencesManager(context) }
-    val unlockedThemes = remember { themeManager.getUnlockedThemes() }
+    val unlockedThemeIds = remember { themeManager.getUnlockedThemes() }
+    val allThemes = remember { Themes.getAllThemes() }
     
     Scaffold(
         topBar = {
@@ -82,11 +83,11 @@ fun ThemeSelectorScreen(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                items(Themes.getAllThemes()) { theme ->
+                items(allThemes) { theme ->
                     ThemeCard(
                         theme = theme,
                         isSelected = theme.id == currentThemeId,
-                        isUnlocked = unlockedThemes.contains(theme.id),
+                        isUnlocked = unlockedThemeIds.contains(theme.id),
                         onSelect = { onThemeSelected(theme.id) }
                     )
                 }

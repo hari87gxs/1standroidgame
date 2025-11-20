@@ -1,13 +1,19 @@
 package com.athreya.mathworkout.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.SportsScore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,12 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.athreya.mathworkout.data.GameMode
+import com.athreya.mathworkout.data.UserPreferencesManager
 import com.athreya.mathworkout.viewmodel.HighScoreViewModel
 import com.athreya.mathworkout.ui.components.AnimatedCounter
 import com.athreya.mathworkout.ui.components.ConfettiAnimation
 import com.athreya.mathworkout.ui.components.ProgressMessageCard
 import com.athreya.mathworkout.ui.components.generateProgressMessages
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 /**
  * ResultsScreen Composable - Shows game results and allows saving high scores.
@@ -37,6 +45,7 @@ import kotlinx.coroutines.launch
  * @param isDailyChallenge Whether this was a daily challenge game
  * @param onViewHighScores Callback to navigate to high scores
  * @param onHomeClick Callback to navigate to home screen
+ * @param onChallengesClick Callback to navigate to challenges screen (optional, for challenge games)
  * @param viewModel ViewModel for managing high score operations
  * @param dailyChallengeViewModel ViewModel for managing daily challenges
  * @param modifier Optional modifier for customizing appearance
@@ -50,10 +59,14 @@ fun ResultsScreen(
     totalTime: Long,
     questionsAnswered: Int,
     isDailyChallenge: Boolean = false,
+    challengeId: String? = null,
     onViewHighScores: () -> Unit,
     onHomeClick: () -> Unit,
+    onChallengesClick: (() -> Unit)? = null,
     viewModel: HighScoreViewModel = viewModel(),
     dailyChallengeViewModel: com.athreya.mathworkout.viewmodel.DailyChallengeViewModel? = null,
+    achievementManager: com.athreya.mathworkout.data.AchievementManager? = null,
+    badgeManager: com.athreya.mathworkout.data.BadgeManager? = null,
     modifier: Modifier = Modifier
 ) {
     // Calculate various time metrics
@@ -104,6 +117,39 @@ fun ResultsScreen(
     var currentMessageIndex by remember { mutableStateOf(0) }
     var streakDays by remember { mutableStateOf(0) }
     
+    // Achievement notification state - only if achievementManager is provided
+    var showAchievementNotification by remember { mutableStateOf(false) }
+    var currentAchievementToShow by remember { mutableStateOf<com.athreya.mathworkout.data.Achievement?>(null) }
+    var pendingAchievements by remember { mutableStateOf<List<com.athreya.mathworkout.data.Achievement>>(emptyList()) }
+    
+    // Get context for UserPreferences
+    val context = LocalContext.current
+    
+    // Observe newly unlocked achievements only if manager exists
+    if (achievementManager != null) {
+        val newlyUnlockedAchievements by achievementManager.newlyUnlockedAchievements.collectAsState(initial = emptyList())
+        
+        // Show achievement notifications one by one
+        LaunchedEffect(newlyUnlockedAchievements) {
+            if (newlyUnlockedAchievements.isNotEmpty() && pendingAchievements.isEmpty()) {
+                // Small delay to ensure screen is fully composed
+                delay(800)
+                pendingAchievements = newlyUnlockedAchievements
+            }
+        }
+        
+        // Display next achievement when previous one is dismissed
+        LaunchedEffect(pendingAchievements, showAchievementNotification) {
+            if (pendingAchievements.isNotEmpty() && !showAchievementNotification) {
+                delay(500) // Small delay between notifications
+                currentAchievementToShow = pendingAchievements.firstOrNull()
+                if (currentAchievementToShow != null) {
+                    showAchievementNotification = true
+                }
+            }
+        }
+    }
+    
     val scope = rememberCoroutineScope()
     
     // Save the high score and generate progress messages when the screen loads
@@ -117,8 +163,16 @@ fun ResultsScreen(
             
             // Always get streak multiplier (applies to all games if daily challenge completed)
             if (dailyChallengeViewModel != null) {
-                bonusMultiplier = dailyChallengeViewModel.getStreakMultiplier()
-                streakDays = dailyChallengeViewModel.getCurrentStreak()
+                try {
+                    bonusMultiplier = dailyChallengeViewModel.getStreakMultiplier()
+                    streakDays = dailyChallengeViewModel.getCurrentStreak()
+                } catch (e: Exception) {
+                    // If there's an error getting streak data, use defaults
+                    e.printStackTrace()
+                    android.util.Log.e("ResultsScreen", "Error getting streak data", e)
+                    bonusMultiplier = 1.0f
+                    streakDays = 0
+                }
             }
             
             finalScore = com.athreya.mathworkout.data.HighScore.applyBonus(basePoints, bonusMultiplier)
@@ -151,6 +205,38 @@ fun ResultsScreen(
                 bonusMultiplier = bonusMultiplier
             )
             
+            // Award XP based on final score
+            // XP = score / 10 (so 100 points = 10 XP, 500 points = 50 XP)
+            val xpEarned = finalScore / 10
+            if (xpEarned > 0) {
+                try {
+                    val userPreferences = UserPreferencesManager(context)
+                    userPreferences.addXP(xpEarned)
+                    android.util.Log.d("ResultsScreen", "Awarded $xpEarned XP for score of $finalScore")
+                } catch (e: Exception) {
+                    android.util.Log.e("ResultsScreen", "Error awarding XP", e)
+                }
+            }
+            
+            // Track badges for this game completion
+            if (badgeManager != null) {
+                try {
+                    val avgTimePerQuestion = if (questionsAnswered > 0) (totalTime / 1000) / questionsAnswered else 999
+                    val newBadges = badgeManager.trackGameCompletion(
+                        timeTaken = avgTimePerQuestion,
+                        wrongAttempts = wrongAttempts,
+                        questionsAnswered = questionsAnswered
+                    )
+                    
+                    if (newBadges.isNotEmpty()) {
+                        android.util.Log.d("ResultsScreen", "Unlocked ${newBadges.size} new badges!")
+                        // TODO: Show badge unlock notification
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("ResultsScreen", "Error tracking badges", e)
+                }
+            }
+            
             // If it's a daily challenge, mark it as complete
             if (isDailyChallenge && dailyChallengeViewModel != null) {
                 dailyChallengeViewModel.completeDailyChallenge(
@@ -173,14 +259,7 @@ fun ResultsScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Confetti animation for new records
-            if (isNewRecord) {
-                ConfettiAnimation(
-                    modifier = Modifier.fillMaxSize(),
-                    particleCount = 100
-                )
-            }
-            
+            // Main content
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -324,38 +403,190 @@ fun ResultsScreen(
             Spacer(modifier = Modifier.weight(1f))
             
             // Action buttons
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // View High Scores button
-                OutlinedButton(
-                    onClick = onViewHighScores,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.EmojiEvents,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Text("High Scores")
+                // Challenge button (only show if this was a challenge game)
+                if (challengeId != null && onChallengesClick != null) {
+                    Button(
+                        onClick = onChallengesClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SportsScore,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Back to Challenges")
+                    }
                 }
                 
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                // Home button
-                Button(
-                    onClick = onHomeClick,
-                    modifier = Modifier.weight(1f)
+                // Row for High Scores and Home buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Home,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Text("Home")
+                    // View High Scores button
+                    OutlinedButton(
+                        onClick = onViewHighScores,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.EmojiEvents,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("High Scores")
+                    }
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+                    
+                    // Home button
+                    Button(
+                        onClick = onHomeClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Home")
+                    }
                 }
             }
+            }
+            
+            // Confetti animation overlay for new records (on top of everything)
+            if (isNewRecord) {
+                ConfettiAnimation(
+                    modifier = Modifier.fillMaxSize(),
+                    particleCount = 150 // Increased for more celebration!
+                )
+            }
+            
+            // Achievement notification overlay (shows after confetti if both exist)
+            if (showAchievementNotification) {
+                currentAchievementToShow?.let { achievement ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.7f))
+                            .clickable {
+                                showAchievementNotification = false
+                                // Remove the shown achievement from pending list
+                                pendingAchievements = pendingAchievements.drop(1)
+                                currentAchievementToShow = null
+                                
+                                // Clear from achievement manager if all have been shown
+                                if (pendingAchievements.isEmpty()) {
+                                    achievementManager?.clearNewlyUnlockedAchievements()
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .wrapContentHeight(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // Celebration icon
+                            Text(
+                                text = "🎉",
+                                fontSize = 64.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            // Achievement unlocked text
+                            Text(
+                                text = "Achievement Unlocked!",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            
+                            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                            
+                            // Achievement icon - use category-based emoji
+                            val categoryEmoji = when (achievement.category) {
+                                com.athreya.mathworkout.data.AchievementCategory.GAMES_PLAYED -> "🎮"
+                                com.athreya.mathworkout.data.AchievementCategory.PERFECT_SCORES -> "💯"
+                                com.athreya.mathworkout.data.AchievementCategory.SPEED_DEMON -> "⚡"
+                                com.athreya.mathworkout.data.AchievementCategory.STREAK_MASTER -> "🔥"
+                                com.athreya.mathworkout.data.AchievementCategory.GAME_MODE_MASTER -> "🎯"
+                                com.athreya.mathworkout.data.AchievementCategory.DIFFICULTY_MASTER -> "🏆"
+                                com.athreya.mathworkout.data.AchievementCategory.DAILY_CHALLENGE -> "📅"
+                                com.athreya.mathworkout.data.AchievementCategory.MULTIPLAYER -> "👥"
+                            }
+                            
+                            Text(
+                                text = categoryEmoji,
+                                fontSize = 48.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            // Achievement title
+                            Text(
+                                text = achievement.title,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            
+                            // Achievement description
+                            Text(
+                                text = achievement.description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            )
+                            
+                            // XP reward
+                            if (achievement.xpReward > 0) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    shape = RoundedCornerShape(50),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "+${achievement.xpReward} XP",
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onTertiary
+                                    )
+                                }
+                            }
+                            
+                            // Tap to dismiss hint
+                            Text(
+                                text = "Tap anywhere to continue",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+                }
+                }  // End of let block
             }
         }
     }

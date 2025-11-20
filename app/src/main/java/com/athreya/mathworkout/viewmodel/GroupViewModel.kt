@@ -10,6 +10,7 @@ import com.athreya.mathworkout.data.social.Group
 import com.athreya.mathworkout.data.social.GroupFirebaseService
 import com.athreya.mathworkout.data.social.GroupMember
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -170,6 +171,14 @@ class GroupViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+    
+    /**
+     * Get members for a specific group as a Flow
+     * This ensures each group shows only its own members
+     */
+    fun getGroupMembersFlow(groupId: String): Flow<List<GroupMember>> {
+        return repository.getGroupMembers(groupId)
     }
     
     /**

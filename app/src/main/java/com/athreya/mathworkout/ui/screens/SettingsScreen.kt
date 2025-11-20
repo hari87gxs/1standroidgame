@@ -236,13 +236,114 @@ fun SettingsScreen(
                 }
             }
             
-            // Scoring System Information Section
-            SettingsSection(title = "Scoring System") {
+            // How to Play - Game Modes
+            SettingsSection(title = "📚 How to Play") {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Practice Mode
+                    GameModeGuide(
+                        icon = "🎯",
+                        title = "Practice Mode",
+                        description = "Play solo to improve your skills and climb the rankings!",
+                        steps = listOf(
+                            "Choose a game mode (Addition, Subtraction, etc.)",
+                            "Select difficulty (Easy/Medium/Hard)",
+                            "Answer questions as fast and accurately as possible",
+                            "Score = Correct answers × Speed × Difficulty",
+                            "Your best scores are saved in High Scores"
+                        )
+                    )
+                    
+                    Divider()
+                    
+                    // Daily Challenge
+                    GameModeGuide(
+                        icon = "📅",
+                        title = "Daily Challenge",
+                        description = "Complete the daily puzzle to build streaks and unlock bonuses!",
+                        steps = listOf(
+                            "New challenge available every day at midnight",
+                            "Complete it to maintain your streak",
+                            "Streak bonuses: 3 days (1.5×), 7 days (2×), 14 days (2.5×), 30 days (3×)",
+                            "Streak multiplier applies to ALL games you play",
+                            "Miss a day and your streak resets to 0"
+                        )
+                    )
+                    
+                    Divider()
+                    
+                    // Groups
+                    GameModeGuide(
+                        icon = "👥",
+                        title = "Groups",
+                        description = "Join or create groups to compete with friends!",
+                        steps = listOf(
+                            "Create a group and share the code with friends",
+                            "Or join an existing group using their code",
+                            "Play any game mode and your scores automatically count",
+                            "Group leaderboard shows rankings based on average score",
+                            "Compete to reach the top of your group!"
+                        )
+                    )
+                    
+                    Divider()
+                    
+                    // Challenges
+                    GameModeGuide(
+                        icon = "⚔️",
+                        title = "Player Challenges",
+                        description = "Challenge other players to head-to-head battles!",
+                        steps = listOf(
+                            "Send a challenge to any player in your groups",
+                            "Choose game mode, difficulty, and question count",
+                            "They play first, then you try to beat their score",
+                            "Whoever scores higher wins the challenge",
+                            "View challenge history in the Challenges tab"
+                        )
+                    )
+                    
+                    Divider()
+                    
+                    // Global Leaderboard
+                    GameModeGuide(
+                        icon = "🌍",
+                        title = "Global Leaderboard",
+                        description = "Compete with players worldwide!",
+                        steps = listOf(
+                            "Register with a unique username",
+                            "Play any game to submit scores globally",
+                            "Filter by game mode and difficulty",
+                            "See your global rank and top players",
+                            "Your badges are displayed next to your name"
+                        )
+                    )
+                    
+                    Divider()
+                    
+                    // Interactive Games
+                    GameModeGuide(
+                        icon = "🎮",
+                        title = "Interactive Games",
+                        description = "Learn through fun, engaging activities!",
+                        steps = listOf(
+                            "Sudoku: Fill the grid with 1-9 (each row, column, box)",
+                            "Daily Riddle: Solve a new math riddle every day",
+                            "Math Tricks Library: Learn calculation shortcuts",
+                            "Practice tricks with guided examples",
+                            "All games count toward achievements!"
+                        )
+                    )
+                }
+            }
+            
+            // Achievements & Badges System
+            SettingsSection(title = "🏆 Achievements & Badges") {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Complete Scoring Formula:",
+                        text = "Unlock badges by completing achievements!",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.primary
@@ -255,147 +356,79 @@ fun SettingsScreen(
                     ) {
                         Column(
                             modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "1. Base Points = Correct × Difficulty",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
+                                text = "🏅 Badge Categories:",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "2. Points with Speed = Base × Time Multiplier",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
+                                text = "• Speed: Complete games quickly",
+                                fontSize = 13.sp
                             )
                             Text(
-                                text = "3. Points after Penalties = Speed Points - (Errors × 5)",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
+                                text = "• Accuracy: Get perfect scores",
+                                fontSize = 13.sp
                             )
                             Text(
-                                text = "4. Final Score = Penalty Points × Streak Multiplier",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
+                                text = "• Collection: Complete all game modes",
+                                fontSize = 13.sp
+                            )
+                            Text(
+                                text = "• Challenge: Win player battles",
+                                fontSize = 13.sp
+                            )
+                            Text(
+                                text = "• Dedication: Build daily streaks",
+                                fontSize = 13.sp
                             )
                         }
                     }
                     
-                    Divider(modifier = Modifier.padding(vertical = 4.dp))
-                    
                     Text(
-                        text = "Breakdown:",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
+                        text = "🌟 Badge Rarity Levels:",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                     
-                    Text(
-                        text = "• Difficulty Points:",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "  - Easy: 10 pts/question",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    Text(
-                        text = "  - Medium: 20 pts/question",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    Text(
-                        text = "  - Hard: 30 pts/question",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    
-                    Text(
-                        text = "• Time Multiplier (based on total game time):",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Text(
-                        text = "  - ≤1s per question: 3× multiplier",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    Text(
-                        text = "    (e.g., ≤10s for 10 questions, ≤20s for 20 questions)",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    Text(
-                        text = "  - ≤1.2s per question: 2× multiplier",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    Text(
-                        text = "    (e.g., ≤12s for 10 questions, ≤24s for 20 questions)",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    Text(
-                        text = "  - >1.2s per question: 1× multiplier",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                    
-                    Text(
-                        text = "• Penalties: -5 points per wrong answer",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    RarityBadge("🥉 Bronze", "Common achievements")
+                    RarityBadge("🥈 Silver", "Challenging achievements")
+                    RarityBadge("🥇 Gold", "Difficult achievements")
+                    RarityBadge("💎 Platinum", "Very rare achievements")
+                    RarityBadge("💠 Diamond", "Ultimate achievements")
                     
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
                     
                     Text(
-                        text = "Daily Challenge Streak Bonuses:",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
+                        text = "📍 Where Your Badges Appear:",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                     
                     Text(
-                        text = "Complete the daily challenge to unlock streak bonuses for ALL games!",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    Text(
-                        text = "• 3+ day streak: 1.5× multiplier",
+                        text = "• Home screen (below your name)",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "• 7+ day streak: 2.0× multiplier",
+                        text = "• Global leaderboard (next to your entry)",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "• 14+ day streak: 2.5× multiplier",
+                        text = "• Group leaderboard (your entry only)",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "• 30+ day streak: 3.0× multiplier",
+                        text = "• Challenge screens (when challenging others)",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
                     Text(
-                        text = "💡 Tip: Build your daily streak to get bonus multipliers on every game you play!",
+                        text = "💡 Tip: Check the Achievements screen to see your progress and unlock more badges!",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary,
@@ -404,6 +437,90 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Composable for displaying a game mode guide
+ */
+@Composable
+private fun GameModeGuide(
+    icon: String,
+    title: String,
+    description: String,
+    steps: List<String>
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = icon,
+                fontSize = 24.sp
+            )
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        
+        Text(
+            text = description,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Column(
+            modifier = Modifier.padding(start = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            steps.forEach { step ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "•",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = step,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Composable for displaying badge rarity information
+ */
+@Composable
+private fun RarityBadge(
+    rarity: String,
+    description: String
+) {
+    Row(
+        modifier = Modifier.padding(start = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = rarity,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = "- $description",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

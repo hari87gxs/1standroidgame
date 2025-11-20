@@ -29,6 +29,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.athreya.mathworkout.data.AppDatabase
 import com.athreya.mathworkout.data.GameMode
+import com.athreya.mathworkout.data.GameType
+import com.athreya.mathworkout.data.GameDifficulty
 import com.athreya.mathworkout.data.ScoreRepositoryImpl
 import com.athreya.mathworkout.data.SettingsManager
 import com.athreya.mathworkout.data.ThemePreferencesManager
@@ -64,6 +66,14 @@ class MainActivity : ComponentActivity() {
         
         // Enable edge-to-edge display (modern Android UI pattern)
         enableEdgeToEdge()
+        
+        // Request notification permission for Android 13+
+        com.athreya.mathworkout.utils.NotificationHelper.requestNotificationPermission(this)
+        
+        // Get and log FCM token for testing
+        com.athreya.mathworkout.utils.NotificationHelper.getFCMToken { token ->
+            android.util.Log.d("MainActivity", "FCM Token: $token")
+        }
         
         setContent {
             val context = LocalContext.current
@@ -113,6 +123,25 @@ fun MathWorkoutApp(
     val database = AppDatabase.getDatabase(context)
     val settingsManager = SettingsManager(context)
     val achievementManager = remember { com.athreya.mathworkout.data.AchievementManager(context) }
+    val userPreferences = remember { com.athreya.mathworkout.data.UserPreferencesManager(context) }
+    val badgeManager = remember { com.athreya.mathworkout.data.BadgeManager(userPreferences) }
+    
+    // Daily login reward state
+    var showDailyReward by remember { mutableStateOf(false) }
+    var dailyRewardData by remember { mutableStateOf<Triple<com.athreya.mathworkout.data.DailyReward, Int, com.athreya.mathworkout.data.DailyLoginManager>?>(null) }
+    val scope = rememberCoroutineScope()
+    
+    // Check for daily login reward on app start
+    LaunchedEffect(Unit) {
+        val dailyLoginManager = com.athreya.mathworkout.data.DailyLoginManager(userPreferences)
+        val (currentStreak, hasNewReward) = dailyLoginManager.checkDailyLogin()
+        
+        if (hasNewReward) {
+            val reward = com.athreya.mathworkout.data.DailyRewards.getRewardForDay(currentStreak)
+            dailyRewardData = Triple(reward, currentStreak, dailyLoginManager)
+            showDailyReward = true
+        }
+    }
     
     // Navigation controller manages navigation between screens
     val navController = rememberNavController()
@@ -149,6 +178,10 @@ fun MathWorkoutApp(
         com.athreya.mathworkout.viewmodel.DailyChallengeViewModel(context.applicationContext as android.app.Application)
     }
     
+    val avatarViewModel: com.athreya.mathworkout.viewmodel.AvatarViewModel = viewModel {
+        com.athreya.mathworkout.viewmodel.AvatarViewModel(context.applicationContext as android.app.Application)
+    }
+    
     val groupViewModel: GroupViewModel = viewModel {
         GroupViewModel(context.applicationContext as android.app.Application)
     }
@@ -168,11 +201,49 @@ fun MathWorkoutApp(
         globalLeaderboardViewModel = globalLeaderboardViewModel,
         homeViewModel = homeViewModel,
         dailyChallengeViewModel = dailyChallengeViewModel,
+        avatarViewModel = avatarViewModel,
         groupViewModel = groupViewModel,
         challengeViewModel = challengeViewModel,
         achievementManager = achievementManager,
+        badgeManager = badgeManager,
+        userPreferencesManager = userPreferences,
         onThemeChanged = onThemeChanged
     )
+    
+    // Daily reward dialog
+    if (showDailyReward && dailyRewardData != null) {
+        val (reward, streak, loginManager) = dailyRewardData!!
+        com.athreya.mathworkout.ui.dialogs.DailyRewardDialog(
+            reward = reward,
+            currentStreak = streak,
+            onDismiss = { showDailyReward = false },
+            onClaim = {
+                scope.launch {
+                    // Award XP
+                    userPreferences.addXP(reward.xpReward)
+                    
+                    // Handle special rewards
+                    reward.specialReward?.let { special ->
+                        when (special) {
+                            is com.athreya.mathworkout.data.SpecialReward.MathematicianUnlock -> {
+                                // Auto-unlock the mathematician
+                                database.avatarDao().unlockAvatar(special.mathematicianId, System.currentTimeMillis())
+                            }
+                            is com.athreya.mathworkout.data.SpecialReward.Badge -> {
+                                // Badge unlocking handled by BadgeManager
+                            }
+                        }
+                    }
+                    
+                    // Check for new badges from login streak
+                    val newBadges = badgeManager.trackLoginStreak(streak)
+                    // TODO: Show badge notification if any newBadges
+                    
+                    showDailyReward = false
+                }
+            }
+        )
+    }
     
     // TODO: Fix achievement notification observer - currently causing crashes
     // Box(modifier = Modifier.fillMaxSize()) {
@@ -206,9 +277,12 @@ fun MathWorkoutNavigation(
     globalLeaderboardViewModel: GlobalLeaderboardViewModel,
     homeViewModel: HomeViewModel,
     dailyChallengeViewModel: com.athreya.mathworkout.viewmodel.DailyChallengeViewModel,
+    avatarViewModel: com.athreya.mathworkout.viewmodel.AvatarViewModel,
     groupViewModel: GroupViewModel,
     challengeViewModel: ChallengeViewModel,
-    achievementManager: com.athreya.mathworkout.data.AchievementManager
+    achievementManager: com.athreya.mathworkout.data.AchievementManager,
+    badgeManager: com.athreya.mathworkout.data.BadgeManager,
+    userPreferencesManager: com.athreya.mathworkout.data.UserPreferencesManager
 ) {
     NavHost(
         navController = navController,
@@ -220,7 +294,7 @@ fun MathWorkoutNavigation(
                 onGameModeSelected = { gameMode ->
                     // Navigate to appropriate screen based on game mode
                     if (gameMode == GameMode.SUDOKU) {
-                        navController.navigate(Screen.Sudoku.route)
+                        navController.navigate(Screen.Sudoku.createRoute(isDailyChallenge = false))
                     } else {
                         navController.navigate(Screen.Game.createRoute(gameMode, isDailyChallenge = false))
                     }
@@ -239,6 +313,18 @@ fun MathWorkoutNavigation(
                 },
                 onGroupsClick = {
                     navController.navigate(Screen.Groups.route)
+                },
+                onMathematiciansClick = {
+                    navController.navigate(Screen.Mathematicians.route)
+                },
+                onBadgesClick = {
+                    navController.navigate(Screen.Badges.route)
+                },
+                onMathTricksClick = {
+                    navController.navigate(Screen.MathTricks.route)
+                },
+                onInteractiveGamesClick = {
+                    navController.navigate(Screen.InteractiveGames.route)
                 },
                 gameViewModel = gameViewModel,
                 homeViewModel = homeViewModel
@@ -307,67 +393,89 @@ fun MathWorkoutNavigation(
                 GameMode.ADDITION_SUBTRACTION // Fallback
             }
             
+            // Create coroutine scope for async operations
+            val scope = androidx.compose.runtime.rememberCoroutineScope()
+            
             GameScreen(
                 gameMode = gameMode,
                 isDailyChallenge = isDailyChallenge,
                 challengeId = challengeId,
                 onGameComplete = { mode, difficulty, wrongAttempts, totalTime, questionsAnswered ->
-                    // Calculate points using the same logic as high scores
-                    val correctAnswers = questionsAnswered - wrongAttempts
-                    val points = com.athreya.mathworkout.data.HighScore.calculatePoints(
-                        questionsAnswered = questionsAnswered,
-                        correctAnswers = correctAnswers,
-                        wrongAttempts = wrongAttempts,
-                        timeTaken = totalTime,
-                        difficulty = difficulty
-                    )
-                    
-                    // Track achievement progress
-                    val timeMultiplier = if (questionsAnswered > 0) {
-                        val avgTimePerQuestion = totalTime.toFloat() / questionsAnswered
-                        when {
-                            avgTimePerQuestion <= 1000 -> 3.0f
-                            avgTimePerQuestion <= 1200 -> 2.0f
-                            else -> 1.0f
-                        }
-                    } else 1.0f
-                    
-                    achievementManager.trackGameCompletion(
-                        score = points,
-                        wrongAttempts = wrongAttempts,
-                        timeMultiplier = timeMultiplier,
-                        difficulty = com.athreya.mathworkout.data.Difficulty.valueOf(difficulty.uppercase()),
-                        isDailyChallenge = isDailyChallenge
-                    )
-                    
-                    // Update member stats in all groups
-                    groupViewModel.updateMemberStatsAfterGame(points)
-                    
-                    // If this is a challenge, submit the result
-                    if (challengeId != null) {
-                        challengeViewModel.submitChallengeResult(
-                            challengeId = challengeId,
-                            score = points,
-                            timeTaken = totalTime,
-                            onSuccess = {
-                                android.util.Log.d("MainActivity", "Challenge result submitted successfully")
-                                // Track challenge win for achievements
-                                achievementManager.trackChallengeWin()
-                            },
-                            onError = { error ->
-                                android.util.Log.e("MainActivity", "Failed to submit challenge result: $error")
+                    // Launch coroutine to handle async operations
+                    scope.launch {
+                        try {
+                            // Calculate base points using the same logic as high scores
+                            val correctAnswers = questionsAnswered - wrongAttempts
+                            val basePoints = com.athreya.mathworkout.data.HighScore.calculatePoints(
+                                questionsAnswered = questionsAnswered,
+                                correctAnswers = correctAnswers,
+                                wrongAttempts = wrongAttempts,
+                                timeTaken = totalTime,
+                                difficulty = difficulty
+                            )
+                            
+                            // Calculate bonus multiplier from daily challenge streak
+                            val bonusMultiplier = try {
+                                dailyChallengeViewModel.getStreakMultiplier()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                1.0f // Default multiplier on error
                             }
-                        )
-                    }
-                    
-                    // Navigate to results screen with game data
-                    // Score will be saved by the ResultsScreen using the registered player name
-                    navController.navigate(
-                        Screen.Results.createRoute(mode, difficulty, wrongAttempts, totalTime, questionsAnswered, isDailyChallenge)
-                    ) {
-                        // Remove the game screen from the back stack
-                        // This prevents users from going back to the finished game
-                        popUpTo(Screen.Game.route) { inclusive = true }
+                            
+                            // Apply bonus to get final score (same as shown in ResultsScreen)
+                            val finalScore = com.athreya.mathworkout.data.HighScore.applyBonus(basePoints, bonusMultiplier)
+                            
+                            // Track achievement progress with final score
+                            val timeMultiplier = if (questionsAnswered > 0) {
+                                val avgTimePerQuestion = totalTime.toFloat() / questionsAnswered
+                                when {
+                                    avgTimePerQuestion <= 1000 -> 3.0f
+                                    avgTimePerQuestion <= 1200 -> 2.0f
+                                    else -> 1.0f
+                                }
+                            } else 1.0f
+                            
+                            achievementManager.trackGameCompletion(
+                                score = finalScore,  // Use final score with bonus applied
+                                wrongAttempts = wrongAttempts,
+                                timeMultiplier = timeMultiplier,
+                                difficulty = com.athreya.mathworkout.data.Difficulty.valueOf(difficulty.uppercase()),
+                                isDailyChallenge = isDailyChallenge
+                            )
+                            
+                            // Update member stats in all groups (use final score with bonus)
+                            groupViewModel.updateMemberStatsAfterGame(finalScore)
+                            
+                            // If this is a challenge, submit the result (use final score with bonus)
+                            if (challengeId != null) {
+                                challengeViewModel.submitChallengeResult(
+                                    challengeId = challengeId,
+                                    score = finalScore,
+                                    timeTaken = totalTime,
+                                    onSuccess = {
+                                        android.util.Log.d("MainActivity", "Challenge result submitted successfully")
+                                        // Track challenge win for achievements
+                                        achievementManager.trackChallengeWin()
+                                    },
+                                    onError = { error ->
+                                        android.util.Log.e("MainActivity", "Failed to submit challenge result: $error")
+                                    }
+                                )
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("MainActivity", "Error in onGameComplete", e)
+                            e.printStackTrace()
+                        }
+                        
+                        // Navigate to results screen with game data (outside try-catch to ensure navigation happens)
+                        // Score will be saved by the ResultsScreen using the registered player name
+                        navController.navigate(
+                            Screen.Results.createRoute(mode, difficulty, wrongAttempts, totalTime, questionsAnswered, isDailyChallenge, challengeId)
+                        ) {
+                            // Remove the game screen from the back stack
+                            // This prevents users from going back to the finished game
+                            popUpTo(Screen.Game.route) { inclusive = true }
+                        }
                     }
                 },
                 onBackClick = {
@@ -386,7 +494,12 @@ fun MathWorkoutNavigation(
                 navArgument("wrongAttempts") { type = NavType.IntType },
                 navArgument("totalTime") { type = NavType.LongType },
                 navArgument("questionsAnswered") { type = NavType.IntType },
-                navArgument("isDailyChallenge") { type = NavType.BoolType; defaultValue = false }
+                navArgument("isDailyChallenge") { type = NavType.BoolType; defaultValue = false },
+                navArgument("challengeId") { 
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
             )
         ) { backStackEntry ->
             // Extract all the game result data from navigation arguments
@@ -397,6 +510,7 @@ fun MathWorkoutNavigation(
             val totalTime = arguments.getLong("totalTime")
             val questionsAnswered = arguments.getInt("questionsAnswered")
             val isDailyChallenge = arguments.getBoolean("isDailyChallenge")
+            val challengeId = arguments.getString("challengeId")
             
             val gameMode = try {
                 GameMode.valueOf(gameModeString)
@@ -411,6 +525,7 @@ fun MathWorkoutNavigation(
                 totalTime = totalTime,
                 questionsAnswered = questionsAnswered,
                 isDailyChallenge = isDailyChallenge,
+                challengeId = challengeId,
                 onViewHighScores = {
                     navController.navigate(Screen.HighScores.route)
                 },
@@ -420,8 +535,16 @@ fun MathWorkoutNavigation(
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                onChallengesClick = {
+                    // Navigate to challenges screen
+                    navController.navigate(Screen.Challenges.route) {
+                        popUpTo(Screen.Home.route)
+                    }
+                },
                 viewModel = highScoreViewModel,
-                dailyChallengeViewModel = dailyChallengeViewModel
+                dailyChallengeViewModel = dailyChallengeViewModel,
+                achievementManager = achievementManager,
+                badgeManager = badgeManager
             )
         }
         
@@ -436,11 +559,32 @@ fun MathWorkoutNavigation(
         }
         
         // Sudoku Screen
-        composable(Screen.Sudoku.route) {
+        composable(
+            route = Screen.Sudoku.route,
+            arguments = listOf(
+                navArgument("isDailyChallenge") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val isDailyChallenge = backStackEntry.arguments?.getBoolean("isDailyChallenge") ?: false
+            
             SudokuScreen(
                 onBackPressed = {
                     navController.navigateUp()
-                }
+                },
+                isDailyChallenge = isDailyChallenge,
+                onChallengeComplete = { timeTaken, wrongAttempts ->
+                    if (isDailyChallenge) {
+                        // Mark daily challenge as complete with actual time
+                        dailyChallengeViewModel.completeChallenge(
+                            timeTaken = timeTaken,
+                            wrongAttempts = wrongAttempts
+                        )
+                    }
+                },
+                globalScoreViewModel = globalScoreViewModel
             )
         }
         
@@ -480,7 +624,7 @@ fun MathWorkoutNavigation(
                         else -> GameMode.TEST_ME
                     }
                     if (gameMode == GameMode.SUDOKU) {
-                        navController.navigate(Screen.Sudoku.route)
+                        navController.navigate(Screen.Sudoku.createRoute(isDailyChallenge = true))
                     } else {
                         navController.navigate(Screen.Game.createRoute(gameMode, isDailyChallenge = true))
                     }
@@ -488,6 +632,104 @@ fun MathWorkoutNavigation(
                 onBackClick = {
                     navController.navigateUp()
                 }
+            )
+        }
+        
+        // Mathematicians Screen
+        composable(Screen.Mathematicians.route) {
+            com.athreya.mathworkout.ui.screens.MathematiciansScreen(
+                viewModel = avatarViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // Badges Screen
+        composable(Screen.Badges.route) {
+            BadgesScreen(
+                badgeManager = badgeManager,
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
+        }
+        
+        // Math Tricks Screen
+        composable(Screen.MathTricks.route) {
+            MathTricksScreen(
+                onBackClick = {
+                    navController.navigateUp()
+                },
+                onTrickClick = { trickId ->
+                    navController.navigate(Screen.TrickDetail.createRoute(trickId))
+                }
+            )
+        }
+        
+        // Math Trick Detail Screen
+        composable(
+            route = Screen.TrickDetail.route,
+            arguments = listOf(
+                navArgument("trickId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val trickId = backStackEntry.arguments?.getString("trickId") ?: return@composable
+            TrickDetailScreen(
+                trickId = trickId,
+                onBackClick = { navController.navigateUp() },
+                onStartPractice = { tId ->
+                    navController.navigate(Screen.TrickPractice.createRoute(tId))
+                }
+            )
+        }
+        
+        // Math Trick Practice Screen
+        composable(
+            route = Screen.TrickPractice.route,
+            arguments = listOf(
+                navArgument("trickId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val trickId = backStackEntry.arguments?.getString("trickId") ?: return@composable
+            TrickPracticeScreen(
+                trickId = trickId,
+                onBackClick = { navController.navigateUp() },
+                onComplete = { score, total ->
+                    // Could save progress here
+                    // For now, just stay on the completion screen
+                }
+            )
+        }
+        
+        // Interactive Games Screen
+        composable(Screen.InteractiveGames.route) {
+            InteractiveGamesScreen(
+                onBackClick = { navController.navigateUp() },
+                onDailyRiddleClick = {
+                    navController.navigate(Screen.DailyRiddle.route)
+                },
+                onGameClick = { gameType, difficulty ->
+                    navController.navigate(Screen.GamePlay.createRoute(gameType, difficulty))
+                }
+            )
+        }
+        
+        // Daily Riddle Screen
+        composable(Screen.DailyRiddle.route) {
+            DailyRiddleScreen(
+                onBackClick = { navController.navigateUp() }
+            )
+        }
+        
+        // Game Play Screen
+        composable(Screen.GamePlay.route) { backStackEntry ->
+            val gameType = backStackEntry.arguments?.getString("gameType") ?: return@composable
+            val difficulty = backStackEntry.arguments?.getString("difficulty") ?: return@composable
+            
+            GamePlayScreen(
+                gameType = GameType.valueOf(gameType),
+                difficulty = GameDifficulty.valueOf(difficulty),
+                onBackClick = { navController.navigateUp() },
+                userPreferencesManager = userPreferencesManager
             )
         }
         
@@ -540,10 +782,10 @@ fun MathWorkoutNavigation(
                     // Get the challenge to extract game mode and difficulty
                     val challenge = challengeViewModel.getChallenge(challengeId)
                     if (challenge != null) {
-                        // Temporarily update game settings to match challenge
+                        // Temporarily update difficulty to match challenge
+                        // NOTE: We don't update question count - use user's settings instead
                         coroutineScope.launch {
                             challengeSettingsManager.updateDifficulty(challenge.difficulty)
-                            challengeSettingsManager.updateQuestionCount(challenge.questionCount)
                         }
                         
                         navController.navigate(

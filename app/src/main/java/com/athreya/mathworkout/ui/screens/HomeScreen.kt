@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
@@ -50,6 +51,10 @@ fun HomeScreen(
     onGlobalScoreClick: () -> Unit,
     onDailyChallengeClick: () -> Unit = {},
     onGroupsClick: () -> Unit = {},
+    onMathematiciansClick: () -> Unit = {},
+    onBadgesClick: () -> Unit = {},
+    onMathTricksClick: () -> Unit = {},
+    onInteractiveGamesClick: () -> Unit = {},
     gameViewModel: GameViewModel? = null,
     homeViewModel: HomeViewModel? = null,
     modifier: Modifier = Modifier
@@ -66,41 +71,25 @@ fun HomeScreen(
             // TopAppBar provides the app bar at the top of the screen
             TopAppBar(
                 title = { 
-                    Column {
-                        Text(
-                            text = "Athreya's Sums",
-                            fontWeight = FontWeight.Bold
-                        )
-                        if (homeUiState.isUserRegistered && homeUiState.playerName != null) {
-                            Text(
-                                text = "Welcome, ${homeUiState.playerName}!",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
+                    Text(
+                        text = "Athreya's Sums",
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 // Add action buttons to the app bar
                 actions = {
-                    // Groups button
-                    IconButton(onClick = onGroupsClick) {
-                        Icon(
-                            imageVector = Icons.Default.Groups,
-                            contentDescription = "Groups"
-                        )
-                    }
-                    // Global scores button
-                    IconButton(onClick = onGlobalScoreClick) {
-                        Icon(
-                            imageVector = Icons.Default.Public,
-                            contentDescription = "Global Scores"
-                        )
-                    }
-                    // High scores button  
-                    IconButton(onClick = onHighScoresClick) {
+                    // Badges button
+                    IconButton(onClick = onBadgesClick) {
                         Icon(
                             imageVector = Icons.Default.EmojiEvents,
-                            contentDescription = "High Scores"
+                            contentDescription = "Badges"
+                        )
+                    }
+                    // Mathematicians button
+                    IconButton(onClick = onMathematiciansClick) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Mathematicians"
                         )
                     }
                     // Settings button
@@ -165,31 +154,38 @@ fun HomeScreen(
                     val achievementManager = remember { com.athreya.mathworkout.data.AchievementManager(context) }
                     val currentRank = remember { achievementManager.getCurrentRank() }
                     
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "👋 Welcome back, ",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            text = playerName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = currentRank.icon,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "!",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "👋 ",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                text = playerName,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = currentRank.icon,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                        
+                        // Display unlocked badges
+                        if (homeUiState.unlockedBadges.isNotEmpty()) {
+                            com.athreya.mathworkout.ui.components.BadgeRow(
+                                badges = homeUiState.unlockedBadges,
+                                maxBadges = 5
+                            )
+                        }
                     }
                 } else {
                     // Show clickable registration prompt
@@ -206,8 +202,114 @@ fun HomeScreen(
                 }
             }
             
-            // Game mode buttons arranged vertically with spacing
-            Spacer(modifier = Modifier.height(8.dp))
+            // Quick Access Icons - Groups, Scores, Global
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Groups Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(80.dp),
+                    onClick = onGroupsClick,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Groups,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Groups",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+                
+                // High Scores Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(80.dp),
+                    onClick = onHighScoresClick,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.EmojiEvents,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Scores",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+                
+                // Global Leaderboard Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(80.dp),
+                    onClick = onGlobalScoreClick,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Global",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Daily Challenge Card (Featured)
             Card(
@@ -296,6 +398,111 @@ fun HomeScreen(
                 text = "🧩 Sudoku",
                 onClick = { onGameModeSelected(GameMode.SUDOKU) }
             )
+            
+            // Fun Learning Section
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Text(
+                text = "🎓 Have Fun Learning Maths!",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            
+            Text(
+                text = "Discover tricks, play games, and become a math wizard!",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            // Learning cards row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Math Tricks Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp),
+                    onClick = onMathTricksClick,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "✨",
+                            fontSize = 36.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Math Tricks",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Learn shortcuts",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                
+                // Interactive Games Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp),
+                    onClick = onInteractiveGamesClick,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "🎮",
+                            fontSize = 36.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Math Games",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Puzzles & riddles",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
     

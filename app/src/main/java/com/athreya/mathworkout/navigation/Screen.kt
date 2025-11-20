@@ -17,6 +17,26 @@ sealed class Screen(val route: String) {
     object HighScores : Screen("high_scores")
     object GlobalLeaderboard : Screen("global_leaderboard")
     object DailyChallenge : Screen("daily_challenge")
+    object Mathematicians : Screen("mathematicians")
+    object Badges : Screen("badges")
+    object MathTricks : Screen("math_tricks")
+    object TrickDetail : Screen("trick_detail/{trickId}") {
+        fun createRoute(trickId: String): String {
+            return "trick_detail/$trickId"
+        }
+    }
+    object TrickPractice : Screen("trick_practice/{trickId}") {
+        fun createRoute(trickId: String): String {
+            return "trick_practice/$trickId"
+        }
+    }
+    object InteractiveGames : Screen("interactive_games")
+    object DailyRiddle : Screen("daily_riddle")
+    object GamePlay : Screen("game_play/{gameType}/{difficulty}") {
+        fun createRoute(gameType: String, difficulty: String): String {
+            return "game_play/$gameType/$difficulty"
+        }
+    }
     
     // Social features
     object Groups : Screen("groups")
@@ -32,9 +52,13 @@ sealed class Screen(val route: String) {
         }
     }
     
-    object Results : Screen("results/{gameMode}/{difficulty}/{wrongAttempts}/{totalTime}/{questionsAnswered}/{isDailyChallenge}") {
-        fun createRoute(gameMode: GameMode, difficulty: String, wrongAttempts: Int, totalTime: Long, questionsAnswered: Int, isDailyChallenge: Boolean = false): String {
-            return "results/${gameMode.name}/$difficulty/$wrongAttempts/$totalTime/$questionsAnswered/$isDailyChallenge"
+    object Results : Screen("results/{gameMode}/{difficulty}/{wrongAttempts}/{totalTime}/{questionsAnswered}/{isDailyChallenge}?challengeId={challengeId}") {
+        fun createRoute(gameMode: GameMode, difficulty: String, wrongAttempts: Int, totalTime: Long, questionsAnswered: Int, isDailyChallenge: Boolean = false, challengeId: String? = null): String {
+            return if (challengeId != null) {
+                "results/${gameMode.name}/$difficulty/$wrongAttempts/$totalTime/$questionsAnswered/$isDailyChallenge?challengeId=$challengeId"
+            } else {
+                "results/${gameMode.name}/$difficulty/$wrongAttempts/$totalTime/$questionsAnswered/$isDailyChallenge"
+            }
         }
     }
     object Game : Screen("game/{gameMode}/{isDailyChallenge}?challengeId={challengeId}") {
@@ -46,6 +70,10 @@ sealed class Screen(val route: String) {
             }
         }
     }
-    object Sudoku : Screen("sudoku")
+    object Sudoku : Screen("sudoku/{isDailyChallenge}") {
+        fun createRoute(isDailyChallenge: Boolean = false): String {
+            return "sudoku/$isDailyChallenge"
+        }
+    }
     object GlobalScore : Screen("global_score")
 }

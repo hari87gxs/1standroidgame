@@ -148,8 +148,8 @@ class AchievementManager(private val context: Context) {
         }
         
         // Check special conditions for theme unlocks
-        // Marvel: Score 10,000+ in a single game
-        if (highScoreSingleGame >= 10000) {
+        // Marvel: Score 300+ in a single game
+        if (highScoreSingleGame >= 300) {
             unlockTheme("marvel")
         }
         

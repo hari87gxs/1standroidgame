@@ -1,17 +1,17 @@
 # Athreya's Math Workout 🧮
 
-A comprehensive Android math training application built with **Kotlin**, **Jetpack Compose**, and modern **Android architecture**. Transform mental math practice into an exciting adventure with achievements, themes, daily challenges, and global competition!
+A comprehensive Android math training application built with **Kotlin**, **Jetpack Compose**, and modern **Android architecture**. Transform mental math practice into an exciting adventure with achievements, badges, themes, daily challenges, interactive games, and global competition!
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Compose-1.5.0-green.svg)](https://developer.android.com/jetpack/compose)
 [![Firebase](https://img.shields.io/badge/Firebase-Integrated-orange.svg)](https://firebase.google.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A feature-rich math workout app designed for students, professionals, and math enthusiasts. Features achievements, unlockable themes, daily challenges, social features, and global leaderboards - all wrapped in a beautiful, customizable interface.
+A feature-rich math workout app designed for students, professionals, and math enthusiasts. Features achievements, unlockable badges, themes, daily challenges, interactive games (Sudoku, Math Tricks, Daily Riddles), social features, and global leaderboards - all wrapped in a beautiful, customizable interface.
 
 ## 📱 Screenshots
 
-[Add screenshots here showing: Home Screen, Game Screen, Achievements, Themes, Daily Challenges, Leaderboard]
+[Add screenshots here showing: Home Screen, Game Screen, Achievements, Badges, Themes, Daily Challenges, Leaderboard, Sudoku, Math Tricks]
 
 ---
 
@@ -22,97 +22,138 @@ A feature-rich math workout app designed for students, professionals, and math e
 - **Practice Mode** - Perfect your skills at your own pace  
 - **Daily Challenges** - Fresh math problems every 24 hours with streak tracking
 - **Timed Sessions** - Race against the clock for maximum scores
-- **Custom Difficulty** - Easy, Medium, Hard, and Expert levels
+- **Custom Difficulty** - Easy, Medium, and Hard levels
+- **Operation Types**: Addition, Subtraction, Multiplication, Division, Mixed, Brain Teasers
 
-### 🏆 Achievement System
-- **10+ Unique Achievements** to unlock through gameplay
+### � Interactive Games
+- **Sudoku** - Classic 9×9 puzzle with difficulty settings
+  - Integrated with global scoring system
+  - Smart hint system with conflict detection
+  - Timer tracking and score calculation
+  - Visual conflict highlighting
+- **Math Tricks Library** - Learn mental calculation shortcuts
+  - Step-by-step explanations
+  - Interactive practice mode
+  - Progress tracking
+- **Daily Riddles** - Solve a new math riddle every day
+  - Brain-teasing challenges
+  - Daily rewards
+  - Riddle history tracking
+
+### 🏆 Achievement & Badge System
+- **50+ Unique Badges** across 5 categories:
+  - ⚡ **Speed** - Complete games quickly
+  - 🎯 **Accuracy** - Perfect scores
+  - 📚 **Collection** - Complete all game modes
+  - ⚔️ **Challenge** - Win player battles
+  - � **Dedication** - Daily streak achievements
+- **5 Rarity Levels**: Bronze → Silver → Gold → Platinum → Diamond
+- **Badge Display**:
+  - Home screen (below username)
+  - Global leaderboard (next to entries)
+  - Group leaderboard (your entry)
+  - Challenge screens (challenger badges)
 - **5-Tier Rank System**: Beginner → Amateur → Expert → Master → Grandmaster
-- **Progress Tracking** with detailed statistics
-- **Achievement Types**:
-  - 🎯 Quick Learner - Complete your first game
-  - ⚡ Speed Demon - Complete 30+ games with 3× time multiplier
-  - 💯 Perfect Score - Achieve 5 perfect games (no errors)
-  - 🔥 Streak Master - Maintain a 7-day login streak
-  - 🎖️ Veteran Player - Complete 50 total games
-  - 🏅 High Scorer - Score 10,000+ in a single game
-  - 👑 Point Collector - Accumulate 50,000 total points
-  - 🎓 Challenge Champion - Win 10 daily challenges
-  - And more!
+- **Progress Tracking** with visual indicators
+- **Achievement Notifications** with celebrations
+
+### 💡 Smart Hint System
+- **Per-Question Tracking** - Wrong attempts counted per question
+- **Progressive Hints** - Educational hints after 2 wrong attempts
+- **Contextual Guidance**:
+  - Addition: Place value breakdown with examples
+  - Subtraction: Inverse relationship explanations
+  - Multiplication: Repeated addition or factoring
+  - Division: Grouping concepts
+- **Auto-Progression** - Show answer after 4 attempts, auto-advance
+- **Educational Focus** - Learn from mistakes with detailed explanations
 
 ### 🎨 Beautiful Themes
 - **7 Stunning Themes** including Dark Mode
 - **Unlockable Themes**:
-  - 🦸 **Marvel Theme** - Unlock by scoring 10,000+ in a single game
+  - 🦸 **Marvel Theme** - Unlock by scoring 300+ in a single game
   - 🦇 **DC Theme** - Unlock by completing 50 games
   - 💡 **Neon Theme** - Unlock with 30+ speed games (3× multiplier)
   - 🌊 **Ocean Theme** - Unlock by maintaining a 7-day streak
   - 🌅 **Sunset Theme** - Unlock by earning 5,000 total points
 - **Dynamic Color Schemes** that adapt to each theme
 - **Persistent Theme Selection** across app sessions
+- **Custom Theme Creator** (coming soon)
 
 ### 📊 Comprehensive Statistics
 - Track **total games played** and **perfect scores**
 - Monitor **current streak** and **high scores**
 - View **rank progression** and **total points**
 - **Detailed performance analytics**
-- **Achievement progress tracking** with visual indicators
+- **Achievement & badge progress** with visual indicators
 - **Historical data** for all game sessions
+- **Game mode breakdown** and statistics
 
 ### 🌍 Global Competition
 - **Firebase-powered global leaderboard**
 - Compete with players **worldwide**
 - **Real-time score updates** and rankings
-- View **top 100 performers**
+- **Username registration** with availability checking
+- View **top performers** with filtering
 - Track your **global ranking**
-- **Country-based filtering** (coming soon)
+- **Filter by game mode and difficulty**
+- **Badge display** showing achievements
 
 ### 👥 Social Features
 - **Create and join math challenge groups**
 - Compete with **friends and family**
-- **Group leaderboards** for private competition
+- **Group leaderboards** with rankings
 - **Send and receive challenges** to other players
-- **Share achievements** and scores
-- **Multiplayer game modes** (coming soon)
+- **Head-to-head battles** with turn-based gameplay
+- **Challenge history** tracking
+- **Group member management** with roles (Admin/Member)
+- **Share group codes** to invite players
+- **Private competitions** within groups
 
 ### ⏰ Daily Challenges
 - **New challenges every day** at midnight
 - **Special rewards** for completion
-- **Limited-time bonuses** and multipliers
-- **Streak tracking** for consecutive days
+- **Streak multipliers**: 3 days (1.5×), 7 days (2×), 14 days (2.5×), 30 days (3×)
+- **Streak bonuses apply to ALL games**
 - **Daily leaderboard** to climb
-- **Challenge history** tracking
+- **Challenge history** tracking with completion dates
+- **Notifications** for new challenges
 
 ### 🎯 Smart Learning
 - **Adaptive difficulty** based on performance
-- Focus on areas needing improvement
+- **Educational hints** with step-by-step explanations
 - **Instant feedback** on answers
-- Track **wrong answers** to learn from mistakes
-- **Progressive skill development**
-- **Time-based multipliers** for advanced players
+- **Progressive hint system** (hint at 2 attempts, answer at 4)
+- **Learn from mistakes** with detailed breakdowns
+- **Auto-progression** to prevent getting stuck
+- **Context-specific guidance** for each operation type
 
 ### ⚡ Game Features
 - **Time multipliers** for bonus points (1.5×, 2×, 3×)
+- **Streak multipliers** from daily challenges
 - **Clean, intuitive interface** with Material Design 3
-- **Smooth animations** and confetti celebrations
+- **Smooth animations** and celebrations
 - **Offline mode** available for local play
-- **No intrusive ads** during gameplay
-- **Multiple operation types**: Addition, Subtraction, Multiplication, Division, Mixed
+- **Auto-submission** when expected digits are entered
+- **Visual feedback** for correct/wrong answers
+- **Comprehensive in-app guide** in Settings
 
 ### 📈 Progress Tracking
 - **Detailed game history** with timestamps
 - **High score records** per difficulty level
 - **Personal best tracking** across all modes
 - **Challenge completion stats**
-- **Weekly and monthly reports** (coming soon)
-- **Export data** functionality (coming soon)
+- **Badge progress** with unlock requirements
+- **Achievement tracking** with visual progress bars
+- **Rank advancement** notifications
 
 ### 🎁 Rewards & Unlockables
 - Unlock **themes through achievements**
-- Earn **points for every game**
-- **Rank up system** with visual badges
+- Earn **badges** across 5 categories
+- **Rank up system** with 5 tiers
 - **Special rewards** for milestones
-- **Collectible achievement badges**
-- **Custom app icons** (coming soon)
+- **50+ collectible badges** with rarities
+- **Visual badges** displayed throughout app
 
 ---
 
@@ -159,12 +200,18 @@ app/src/main/java/com/athreya/mathworkout/
 │   ├── HighScoreDao.kt                 # Local database queries
 │   ├── Achievement.kt                  # Achievement data models
 │   ├── AchievementManager.kt           # Achievement logic & tracking
+│   ├── Badge.kt                        # Badge system (50+ badges)
+│   ├── BadgeManager.kt                 # Badge unlock & progress tracking
 │   ├── Rank.kt                         # Rank system definitions
 │   ├── ThemePreferencesManager.kt      # Theme selection persistence
 │   ├── UserPreferencesManager.kt       # User settings management
 │   ├── DailyChallenge.kt              # Daily challenge models
-│   ├── DailyStreak.kt                 # Streak tracking
+│   ├── DailyStreak.kt                 # Streak tracking & multipliers
 │   ├── FirebaseScoreService.kt        # Firebase integration
+│   ├── Group.kt                       # Group & challenge models
+│   ├── Mathematician.kt               # Famous mathematicians library
+│   ├── MathTrick.kt                   # Math tricks data models
+│   ├── SudokuEngine.kt                # Sudoku generation & validation
 │   ├── ScoreRepository.kt             # Score data abstraction
 │   ├── network/                       # Network layer
 │   │   ├── GlobalScoreApiService.kt   # API definitions
@@ -183,24 +230,34 @@ app/src/main/java/com/athreya/mathworkout/
 │
 ├── ui/                                # UI layer
 │   ├── screens/                       # Screen composables
-│   │   ├── HomeScreen.kt             # Main menu with rank badge
+│   │   ├── HomeScreen.kt             # Main menu with badges
 │   │   ├── GameScreen.kt             # Math problem gameplay
 │   │   ├── ResultsScreen.kt          # Game results with confetti
-│   │   ├── SettingsScreen.kt         # App settings & preferences
+│   │   ├── SettingsScreen.kt         # Settings & How to Play guide
 │   │   ├── HighScoreScreen.kt        # Local high scores
 │   │   ├── AchievementsScreen.kt     # Achievement tracking UI
+│   │   ├── BadgesScreen.kt           # Badge collection display
 │   │   ├── ThemeSelectorScreen.kt    # Theme customization
-│   │   ├── DailyChallengeScreen.kt   # Daily challenges
+│   │   ├── DailyChallengeScreen.kt   # Daily challenges & streaks
 │   │   ├── GlobalScoreScreen.kt      # Global leaderboard
 │   │   ├── GroupsScreen.kt           # Social groups
-│   │   ├── GroupDetailScreen.kt      # Group details & members
-│   │   ├── ChallengesScreen.kt       # Challenge management
-│   │   └── GlobalLeaderboardScreen.kt # Top global scores
+│   │   ├── GroupDetailScreen.kt      # Group details & leaderboard
+│   │   ├── ChallengesScreen.kt       # Player challenges
+│   │   ├── MathematiciansScreen.kt   # Famous mathematicians
+│   │   ├── MathTricksScreen.kt       # Math tricks library
+│   │   ├── TrickDetailScreen.kt      # Trick explanations
+│   │   ├── TrickPracticeScreen.kt    # Interactive practice
+│   │   ├── InteractiveGamesScreen.kt # Games hub
+│   │   ├── SudokuScreen.kt           # Sudoku gameplay
+│   │   ├── DailyRiddleScreen.kt      # Daily math riddles
+│   │   └── GamePlayScreen.kt         # Generic game play
 │   │
 │   ├── components/                    # Reusable UI components
 │   │   ├── Animations.kt             # Animation utilities
 │   │   ├── ConfettiAnimation.kt      # Confetti particle system
 │   │   ├── AchievementNotifications.kt # Achievement popups
+│   │   ├── BadgeDisplay.kt           # Badge UI components
+│   │   ├── GlobalLeaderboardScreen.kt # Leaderboard with badges
 │   │   ├── AnimatedCounter.kt        # Animated number displays
 │   │   ├── ProgressIndicators.kt     # Custom progress bars
 │   │   ├── PlayerNameDialog.kt       # User input dialogs
@@ -352,7 +409,7 @@ implementation "androidx.compose.material:material-icons-extended:1.5.4"
 - **Bonus**: Perfect game (no errors) = 50 bonus points
 
 ### Unlocking Themes
-- **Marvel**: Score 10,000+ in a single game
+- **Marvel**: Score 300+ in a single game
 - **DC**: Complete 50 total games
 - **Neon**: Complete 30+ games with 3× time multiplier
 - **Ocean**: Maintain a 7-day login streak

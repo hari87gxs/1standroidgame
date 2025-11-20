@@ -31,7 +31,7 @@ fun GroupDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val selectedGroup by groupViewModel.selectedGroup.collectAsState()
-    val groupMembers by groupViewModel.groupMembers.collectAsState()
+    val groupMembers by groupViewModel.getGroupMembersFlow(groupId).collectAsState(initial = emptyList())
     val myMembership by groupViewModel.getMyMembership(groupId).collectAsState(initial = null)
     
     val context = LocalContext.current
@@ -388,6 +388,13 @@ fun LeaderboardCard(
     member: GroupMember,
     isCurrentUser: Boolean
 ) {
+    // Load badges for current user
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val badgeManager = remember { com.athreya.mathworkout.data.BadgeManager(com.athreya.mathworkout.data.UserPreferencesManager(context)) }
+    val unlockedBadges = remember { 
+        if (isCurrentUser) badgeManager.getUnlockedBadges().take(3) else emptyList() 
+    }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(
@@ -458,6 +465,15 @@ fun LeaderboardCard(
                                 )
                             }
                         }
+                    }
+                    
+                    // Display badges for current user
+                    if (isCurrentUser && unlockedBadges.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        com.athreya.mathworkout.ui.components.BadgeRow(
+                            badges = unlockedBadges,
+                            maxBadges = 3
+                        )
                     }
                     
                     Spacer(modifier = Modifier.height(4.dp))

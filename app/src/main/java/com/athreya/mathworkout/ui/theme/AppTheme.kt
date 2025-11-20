@@ -73,7 +73,7 @@ object Themes {
         name = "Marvel Heroes",
         description = "Avengers assemble!",
         isLocked = true,
-        unlockRequirement = "Score 10,000 points in a single game",
+        unlockRequirement = "Score 300+ points in a single game",
         icon = "🦸‍♂️",
         primaryColor = Color(0xFFED1D24), // Marvel Red
         secondaryColor = Color(0xFFFFD700), // Gold
@@ -113,7 +113,7 @@ object Themes {
         name = "Neon Nights",
         description = "Cyberpunk vibes",
         isLocked = true,
-        unlockRequirement = "Win 20 challenges",
+        unlockRequirement = "Complete 30 games with 3× speed multiplier",
         icon = "⚡",
         primaryColor = Color(0xFFFF006E), // Hot Pink
         secondaryColor = Color(0xFF00F5FF), // Cyan
@@ -153,7 +153,7 @@ object Themes {
         name = "Golden Sunset",
         description = "Warm and cozy",
         isLocked = true,
-        unlockRequirement = "Reach level 10",
+        unlockRequirement = "Earn 5,000 total points",
         icon = "🌅",
         primaryColor = Color(0xFFFF6B35), // Orange
         secondaryColor = Color(0xFFF7931E), // Golden Orange
@@ -175,13 +175,12 @@ object Themes {
     }
     
     /**
-     * Get unlocked themes (for now, returns all for testing)
+     * Get unlocked themes based on ThemePreferencesManager
+     * Always returns Default and Dark, plus any unlocked themes
      */
-    fun getUnlockedThemes(testMode: Boolean = true): List<AppTheme> {
-        return if (testMode) {
-            getAllThemes()
-        } else {
-            getAllThemes().filter { !it.isLocked }
+    fun getUnlockedThemes(unlockedThemeIds: Set<String>): List<AppTheme> {
+        return getAllThemes().filter { theme ->
+            !theme.isLocked || unlockedThemeIds.contains(theme.id)
         }
     }
     

@@ -7,6 +7,7 @@ import com.athreya.mathworkout.data.social.Challenge
 import com.athreya.mathworkout.data.social.ChallengeDao
 import com.athreya.mathworkout.data.social.ChallengeFirebaseService
 import com.athreya.mathworkout.data.social.ChallengeStatus
+import com.athreya.mathworkout.data.social.GroupFirebaseService
 import com.athreya.mathworkout.data.social.GroupMemberDao
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
@@ -20,7 +21,8 @@ class ChallengeRepository(
     private val challengeDao: ChallengeDao,
     private val groupMemberDao: GroupMemberDao,
     private val userPreferences: UserPreferencesManager,
-    private val firebaseService: ChallengeFirebaseService? = null
+    private val firebaseService: ChallengeFirebaseService? = null,
+    private val groupFirebaseService: GroupFirebaseService? = null
 ) {
     
     /**
@@ -324,8 +326,26 @@ class ChallengeRepository(
                     groupMemberDao.incrementChallengesLost(challenge.groupId, loserId)
                 }
                 
-                // Note: Member stats will be synced to Firebase when the group is next synced
-                // or when other group operations occur (updateMemberStatsAfterGame, etc.)
+                // Sync updated member stats to Firebase immediately
+                try {
+                    // Upload winner stats
+                    val winnerMember = groupMemberDao.getMember(challenge.groupId, winnerId)
+                    if (winnerMember != null) {
+                        groupFirebaseService?.uploadMember(winnerMember)
+                        android.util.Log.d("ChallengeRepository", "Synced winner stats to Firebase: ${winnerMember.memberName} (${winnerMember.challengesWon}W-${winnerMember.challengesLost}L)")
+                    }
+                    
+                    // Upload loser stats
+                    if (loserId != null) {
+                        val loserMember = groupMemberDao.getMember(challenge.groupId, loserId)
+                        if (loserMember != null) {
+                            groupFirebaseService?.uploadMember(loserMember)
+                            android.util.Log.d("ChallengeRepository", "Synced loser stats to Firebase: ${loserMember.memberName} (${loserMember.challengesWon}W-${loserMember.challengesLost}L)")
+                        }
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("ChallengeRepository", "Error syncing member stats to Firebase", e)
+                }
             }
             
             // Sync finalized challenge to Firebase

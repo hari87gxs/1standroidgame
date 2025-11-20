@@ -292,6 +292,11 @@ fun PendingChallengeCard(
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
+    // Load badges for challenger (showing their accomplishments)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val badgeManager = remember { com.athreya.mathworkout.data.BadgeManager(com.athreya.mathworkout.data.UserPreferencesManager(context)) }
+    val challengerBadges = remember { badgeManager.getUnlockedBadges().take(3) }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -307,11 +312,21 @@ fun PendingChallengeCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "${challenge.challengerName} challenges you!",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${challenge.challengerName} challenges you!",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    // Display challenger's badges
+                    if (challengerBadges.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        com.athreya.mathworkout.ui.components.BadgeRow(
+                            badges = challengerBadges,
+                            maxBadges = 3
+                        )
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Game: ${challenge.gameMode}",

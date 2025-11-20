@@ -25,6 +25,7 @@ data class GameUiState(
     val totalQuestions: Int = 0,
     val userAnswer: String = "",
     val wrongAttempts: Int = 0,
+    val currentQuestionWrongAttempts: Int = 0, // Track wrong attempts for current question only
     val gameStartTime: Long = 0L,
     val isGameActive: Boolean = false,
     val isLoading: Boolean = true,
@@ -108,7 +109,8 @@ class GameViewModel(
         
         _uiState.value = currentState.copy(
             currentQuestion = question,
-            userAnswer = ""
+            userAnswer = "",
+            currentQuestionWrongAttempts = 0 // Reset wrong attempts for new question
         )
     }
     
@@ -139,6 +141,7 @@ class GameViewModel(
      * Submit the user's answer and handle the result.
      * This function checks if the answer is correct and either
      * moves to the next question or increments wrong attempts.
+     * After 4 wrong attempts, automatically moves to next question.
      */
     fun submitAnswer() {
         val currentState = _uiState.value
@@ -160,11 +163,37 @@ class GameViewModel(
                 generateNextQuestion()
             }
         } else {
-            // Wrong answer - increment wrong attempts and clear input
-            _uiState.value = currentState.copy(
-                wrongAttempts = currentState.wrongAttempts + 1,
-                userAnswer = ""
-            )
+            // Wrong answer - increment wrong attempts
+            val newCurrentQuestionAttempts = currentState.currentQuestionWrongAttempts + 1
+            
+            // After 4 wrong attempts, move to next question automatically after showing answer
+            if (newCurrentQuestionAttempts >= 4) {
+                // Update state to show answer
+                _uiState.value = currentState.copy(
+                    wrongAttempts = currentState.wrongAttempts + 1,
+                    currentQuestionWrongAttempts = newCurrentQuestionAttempts,
+                    userAnswer = ""
+                )
+                
+                // Wait 2.5 seconds before moving to next question
+                viewModelScope.launch {
+                    delay(2500)
+                    if (_uiState.value.questionNumber >= _uiState.value.totalQuestions) {
+                        endGame()
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            questionNumber = _uiState.value.questionNumber + 1
+                        )
+                        generateNextQuestion()
+                    }
+                }
+            } else {
+                _uiState.value = currentState.copy(
+                    wrongAttempts = currentState.wrongAttempts + 1,
+                    currentQuestionWrongAttempts = newCurrentQuestionAttempts,
+                    userAnswer = ""
+                )
+            }
         }
     }
     

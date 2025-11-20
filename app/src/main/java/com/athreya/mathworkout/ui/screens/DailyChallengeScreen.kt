@@ -72,6 +72,7 @@ fun DailyChallengeScreen(
                 todaysChallenge?.let { challenge ->
                     TodaysChallengeCard(
                         challenge = challenge,
+                        currentStreak = calculateStreak(completedChallenges),
                         onStartClick = { onStartChallenge(challenge) }
                     )
                 } ?: run {
@@ -113,9 +114,21 @@ fun DailyChallengeScreen(
 @Composable
 fun TodaysChallengeCard(
     challenge: DailyChallenge,
+    currentStreak: Int,
     onStartClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Calculate actual streak multiplier
+    val baseMultiplier = 2.7f
+    val streakBonus = when {
+        currentStreak >= 30 -> 1.3f
+        currentStreak >= 14 -> 1.2f
+        currentStreak >= 7 -> 1.15f
+        currentStreak >= 3 -> 1.1f
+        else -> 1.0f
+    }
+    val actualMultiplier = baseMultiplier * streakBonus
+    
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
@@ -188,8 +201,8 @@ fun TodaysChallengeCard(
                 )
             }
             
-            // Bonus multiplier badge
-            BonusMultiplierBadge(multiplier = challenge.bonusMultiplier)
+            // Bonus multiplier badge - show actual streak multiplier
+            BonusMultiplierBadge(multiplier = actualMultiplier)
             
             // Start/Completed button
             if (!challenge.completed) {

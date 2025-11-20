@@ -33,9 +33,10 @@ import com.athreya.mathworkout.data.social.ChallengeDao
         MultiplayerGame::class,
         Group::class,
         GroupMember::class,
-        Challenge::class
+        Challenge::class,
+        com.athreya.mathworkout.data.avatar.Avatar::class
     ],
-    version = 6,
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -55,6 +56,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun groupDao(): GroupDao
     abstract fun groupMemberDao(): GroupMemberDao
     abstract fun challengeDao(): ChallengeDao
+    
+    // Avatar DAO
+    abstract fun avatarDao(): com.athreya.mathworkout.data.avatar.AvatarDao
     
     companion object {
         /**
@@ -228,6 +232,87 @@ abstract class AppDatabase : RoomDatabase() {
         }
         
         /**
+         * Migration from version 6 to version 7.
+         * Adds avatars table for mathematician avatar system with educational trivia.
+         */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create avatars table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS avatars (
+                        avatarId TEXT PRIMARY KEY NOT NULL,
+                        name TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL,
+                        era TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        xpCost INTEGER NOT NULL,
+                        rarity TEXT NOT NULL,
+                        trivia TEXT NOT NULL,
+                        contribution TEXT NOT NULL,
+                        funFact TEXT NOT NULL,
+                        isUnlocked INTEGER NOT NULL DEFAULT 0,
+                        unlockedAt INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+            }
+        }
+        
+        /**
+         * Migration from version 7 to version 8.
+         * Refreshes avatars table to include updated image URLs from Wikipedia.
+         */
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Drop and recreate avatars table to ensure fresh data with image URLs
+                database.execSQL("DROP TABLE IF EXISTS avatars")
+                database.execSQL("""
+                    CREATE TABLE avatars (
+                        avatarId TEXT PRIMARY KEY NOT NULL,
+                        name TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL,
+                        era TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        xpCost INTEGER NOT NULL,
+                        rarity TEXT NOT NULL,
+                        trivia TEXT NOT NULL,
+                        contribution TEXT NOT NULL,
+                        funFact TEXT NOT NULL,
+                        isUnlocked INTEGER NOT NULL DEFAULT 0,
+                        unlockedAt INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+            }
+        }
+        
+        /**
+         * Migration from version 8 to version 9.
+         * Adds emoji column for visual representation.
+         */
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Drop and recreate to add emoji column
+                database.execSQL("DROP TABLE IF EXISTS avatars")
+                database.execSQL("""
+                    CREATE TABLE avatars (
+                        avatarId TEXT PRIMARY KEY NOT NULL,
+                        name TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL,
+                        emoji TEXT NOT NULL DEFAULT '🎓',
+                        era TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        xpCost INTEGER NOT NULL,
+                        rarity TEXT NOT NULL,
+                        trivia TEXT NOT NULL,
+                        contribution TEXT NOT NULL,
+                        funFact TEXT NOT NULL,
+                        isUnlocked INTEGER NOT NULL DEFAULT 0,
+                        unlockedAt INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+            }
+        }
+        
+        /**
          * Singleton instance of the database.
          * @Volatile ensures that this field is immediately visible to all threads.
          */
@@ -254,7 +339,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "math_workout_database"
                 )
                     // Add migrations for schema changes
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     // Fallback to destructive migration during development
                     .fallbackToDestructiveMigration()
                     .build()

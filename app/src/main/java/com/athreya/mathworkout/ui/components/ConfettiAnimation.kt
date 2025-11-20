@@ -82,7 +82,7 @@ fun ConfettiAnimation(
                 }
                 drawPath(
                     path = path,
-                    color = particle.color.copy(alpha = 1f - progress)
+                    color = particle.color.copy(alpha = (1f - progress).coerceIn(0f, 1f))
                 )
             }
         }

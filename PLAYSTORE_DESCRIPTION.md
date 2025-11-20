@@ -27,7 +27,7 @@ Athreya's Math Workout is the ultimate brain training app designed to sharpen yo
 
 **🎨 Beautiful Themes**
 • 7 Stunning Themes including Dark Mode
-• Marvel Theme - Unlock by scoring 10,000+ in a single game
+• Marvel Theme - Unlock by scoring 300+ in a single game
 • DC Theme - Unlock by completing 50 games
 • Neon, Ocean, and Sunset themes
 • More themes unlocked through achievements

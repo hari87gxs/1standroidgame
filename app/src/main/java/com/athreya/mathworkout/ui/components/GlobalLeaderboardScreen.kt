@@ -423,6 +423,11 @@ private fun LeaderboardItem(
     rank: Int,
     score: HighScore
 ) {
+    // Load badges for this player (in a real app, this would come from the score data)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val badgeManager = remember { com.athreya.mathworkout.data.BadgeManager(com.athreya.mathworkout.data.UserPreferencesManager(context)) }
+    val unlockedBadges = remember { badgeManager.getUnlockedBadges().take(3) } // Show top 3 badges
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -462,11 +467,21 @@ private fun LeaderboardItem(
             
             // Player Info and Score Details
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = score.playerName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = score.playerName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    // Display badges next to player name
+                    if (unlockedBadges.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        com.athreya.mathworkout.ui.components.BadgeRow(
+                            badges = unlockedBadges,
+                            maxBadges = 3
+                        )
+                    }
+                }
                 Text(
                     text = "${score.gameMode.replace("_", " ")} • ${score.difficulty}",
                     style = MaterialTheme.typography.bodySmall,

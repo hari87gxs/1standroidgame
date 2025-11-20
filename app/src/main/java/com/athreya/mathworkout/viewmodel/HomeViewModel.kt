@@ -3,6 +3,8 @@ package com.athreya.mathworkout.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.athreya.mathworkout.data.Badge
+import com.athreya.mathworkout.data.BadgeManager
 import com.athreya.mathworkout.data.ScoreRepositoryImpl
 import com.athreya.mathworkout.data.UserPreferencesManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +21,8 @@ data class HomeUiState(
     val showRegistrationDialog: Boolean = false,
     val isCheckingUsername: Boolean = false,
     val usernameAvailable: Boolean? = null,
-    val registrationError: String? = null
+    val registrationError: String? = null,
+    val unlockedBadges: List<Badge> = emptyList()
 )
 
 /**
@@ -32,12 +35,26 @@ class HomeViewModel(
     
     private val userPreferences = UserPreferencesManager(context)
     private val scoreRepository = ScoreRepositoryImpl(context)
+    private val badgeManager = BadgeManager(userPreferences)
     
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
     init {
         checkUserRegistration()
+        loadBadges()
+    }
+    
+    /**
+     * Load unlocked badges
+     */
+    private fun loadBadges() {
+        viewModelScope.launch {
+            val unlockedBadges = badgeManager.getUnlockedBadges()
+            _uiState.value = _uiState.value.copy(
+                unlockedBadges = unlockedBadges
+            )
+        }
     }
     
     /**

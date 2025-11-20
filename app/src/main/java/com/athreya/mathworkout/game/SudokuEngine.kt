@@ -242,6 +242,92 @@ class SudokuEngine {
         }
     }
     
+    /**
+     * Auto-solve the entire puzzle by filling in all empty cells.
+     * Used for testing purposes.
+     */
+    fun autoSolvePuzzle(gameState: SudokuGameState): SudokuGameState {
+        // Create a mutable grid for solving
+        val mutableGrid = gameState.grid.map { row ->
+            row.map { it.value }.toMutableList()
+        }.toMutableList()
+        
+        // Solve using backtracking
+        if (solveSudoku(mutableGrid)) {
+            // Convert back to SudokuCell grid
+            val solvedGrid = mutableGrid.mapIndexed { row, rowList ->
+                rowList.mapIndexed { col, value ->
+                    val originalCell = gameState.grid[row][col]
+                    if (originalCell.isGiven) {
+                        originalCell
+                    } else {
+                        SudokuCell(value = value, isGiven = false)
+                    }
+                }
+            }
+            
+            // Return completed state
+            return gameState.copy(
+                grid = solvedGrid,
+                isValid = true,
+                isCompleted = true
+            )
+        }
+        
+        return gameState
+    }
+    
+    /**
+     * Solve Sudoku using backtracking algorithm
+     */
+    private fun solveSudoku(grid: MutableList<MutableList<Int>>): Boolean {
+        for (row in 0..8) {
+            for (col in 0..8) {
+                if (grid[row][col] == 0) {
+                    for (num in 1..9) {
+                        if (isValidPlacement(grid, row, col, num)) {
+                            grid[row][col] = num
+                            
+                            if (solveSudoku(grid)) {
+                                return true
+                            }
+                            
+                            grid[row][col] = 0 // Backtrack
+                        }
+                    }
+                    return false
+                }
+            }
+        }
+        return true // All cells filled
+    }
+    
+    /**
+     * Check if placing a number at a position is valid
+     */
+    private fun isValidPlacement(grid: List<List<Int>>, row: Int, col: Int, num: Int): Boolean {
+        // Check row
+        for (c in 0..8) {
+            if (grid[row][c] == num) return false
+        }
+        
+        // Check column
+        for (r in 0..8) {
+            if (grid[r][col] == num) return false
+        }
+        
+        // Check 3x3 box
+        val boxRow = row / 3
+        val boxCol = col / 3
+        for (r in boxRow * 3..(boxRow * 3 + 2)) {
+            for (c in boxCol * 3..(boxCol * 3 + 2)) {
+                if (grid[r][c] == num) return false
+            }
+        }
+        
+        return true
+    }
+    
     // Private helper methods
     
     private fun generateCompleteSolution(): List<List<Int>> {

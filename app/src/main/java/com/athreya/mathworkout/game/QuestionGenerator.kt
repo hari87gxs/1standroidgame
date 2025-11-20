@@ -17,7 +17,79 @@ data class MathQuestion(
     val correctAnswer: Int,
     val operation: String,
     val expectedDigits: Int = correctAnswer.toString().length
-)
+) {
+    /**
+     * Generate a helpful hint based on the question
+     */
+    val hint: String
+        get() {
+            // Extract numbers and operations from question
+            return when {
+                "+" in question -> {
+                    val parts = question.replace("=", "").replace("?", "").trim().split("+")
+                    if (parts.size >= 2) {
+                        val num1 = parts[0].trim().toIntOrNull()
+                        val num2 = parts[1].trim().toIntOrNull()
+                        when {
+                            num1 != null && num2 != null -> {
+                                val tens = (num1 / 10) * 10 + (num2 / 10) * 10
+                                val ones = (num1 % 10) + (num2 % 10)
+                                "💡 Break it down: ${num1} = ${(num1/10)*10} + ${num1%10}, ${num2} = ${(num2/10)*10} + ${num2%10}. Add tens first: $tens, then ones: ${num1%10}+${num2%10}=${ones}"
+                            }
+                            else -> "💡 Add the numbers step by step, starting with the ones place"
+                        }
+                    } else "💡 Add the numbers together"
+                }
+                "-" in question -> {
+                    val parts = question.replace("=", "").replace("?", "").trim().split("-")
+                    if (parts.size >= 2) {
+                        val num1 = parts[0].trim().toIntOrNull()
+                        val num2 = parts[1].trim().toIntOrNull()
+                        when {
+                            num1 != null && num2 != null -> {
+                                "💡 Think: ${num2} + ? = ${num1}. Or count backwards from ${num1} by ${num2}"
+                            }
+                            else -> "💡 Subtract step by step, borrowing if needed"
+                        }
+                    } else "💡 Subtract carefully"
+                }
+                "×" in question || "*" in question -> {
+                    val parts = question.replace("=", "").replace("?", "").trim().split(Regex("[×*]"))
+                    if (parts.size >= 2) {
+                        val num1 = parts[0].trim().toIntOrNull()
+                        val num2 = parts[1].trim().toIntOrNull()
+                        when {
+                            num1 != null && num2 != null && num2 <= 10 -> {
+                                val steps = (1..num2).map { "$num1" }.joinToString(" + ")
+                                "💡 ${num1} × ${num2} means ${num1} added ${num2} times: $steps"
+                            }
+                            num1 != null && num2 != null -> {
+                                "💡 Break ${num2} into parts: ${num1}×${(num2/10)*10} + ${num1}×${num2%10}"
+                            }
+                            else -> "💡 Use skip counting or repeated addition"
+                        }
+                    } else "💡 Multiply step by step"
+                }
+                "÷" in question || "/" in question -> {
+                    val parts = question.replace("=", "").replace("?", "").trim().split(Regex("[÷/]"))
+                    if (parts.size >= 2) {
+                        val num1 = parts[0].trim().toIntOrNull()
+                        val num2 = parts[1].trim().toIntOrNull()
+                        when {
+                            num1 != null && num2 != null -> {
+                                "💡 How many groups of ${num2} fit into ${num1}? Or: ${num2} × ? = ${num1}"
+                            }
+                            else -> "💡 Division is the opposite of multiplication"
+                        }
+                    } else "💡 Think about division as grouping"
+                }
+                operation == "Brain Teaser" -> {
+                    "💡 Follow BODMAS: Brackets first, then ×÷ (left to right), then +- (left to right)"
+                }
+                else -> "💡 Take your time and work through it step by step"
+            }
+        }
+}
 
 /**
  * QuestionGenerator is responsible for creating math questions based on

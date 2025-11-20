@@ -19,4 +19,12 @@
     <string name="wrong_attempts">Wrong Attempts: %d</string>
     <string name="time_penalty">Time Penalty: %s</string>
     <string name="final_score">Final Score: %s</string>
+    
+    <!-- Notification strings -->
+    <string name="default_notification_channel_id">default_channel</string>
+    <string name="default_notification_channel_name">General Notifications</string>
+    <string name="challenge_notification_channel_id">challenge_channel</string>
+    <string name="challenge_notification_channel_name">Challenge Notifications</string>
+    <string name="new_challenge_title">New Challenge!</string>
+    <string name="new_challenge_body">%s has challenged you to a math duel!</string>
 </resources>

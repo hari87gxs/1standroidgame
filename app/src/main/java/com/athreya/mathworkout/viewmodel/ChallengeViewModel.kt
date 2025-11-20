@@ -31,11 +31,17 @@ class ChallengeViewModel(application: Application) : AndroidViewModel(applicatio
         application
     )
     
+    private val groupFirebaseService = com.athreya.mathworkout.data.social.GroupFirebaseService(
+        FirebaseFirestore.getInstance(),
+        application
+    )
+    
     private val repository = ChallengeRepository(
         challengeDao,
         groupMemberDao,
         userPreferences,
-        firebaseService
+        firebaseService,
+        groupFirebaseService
     )
     
     // UI State

@@ -14,8 +14,8 @@ android {
         applicationId = "com.athreya.mathworkout"
         minSdk = 24
         targetSdk = 35
-        versionCode = 12
-        versionName = "2.5"
+        versionCode = 24
+        versionName = "4.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -101,6 +101,9 @@ dependencies {
     // Material Icons Extended
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     
+    // Image loading with Coil
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    
     // Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
@@ -115,6 +118,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx") // For push notifications
     
     // TODO: Re-enable Hilt later  
     // implementation("com.google.dagger:hilt-android:2.44")

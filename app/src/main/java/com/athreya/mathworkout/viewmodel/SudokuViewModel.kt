@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -28,6 +29,9 @@ class SudokuViewModel : ViewModel() {
     private val _isGameActive = MutableStateFlow(false)
     val isGameActive: StateFlow<Boolean> = _isGameActive.asStateFlow()
     
+    private val _difficulty = MutableStateFlow(SudokuDifficulty.EASY)
+    val difficulty: StateFlow<SudokuDifficulty> = _difficulty.asStateFlow()
+    
     private var gameStartTime: Long = 0
     
     /**
@@ -35,6 +39,7 @@ class SudokuViewModel : ViewModel() {
      */
     fun startNewGame(difficulty: SudokuDifficulty = SudokuDifficulty.EASY) {
         viewModelScope.launch {
+            _difficulty.value = difficulty
             val newGameState = sudokuEngine.generatePuzzle(difficulty)
             _gameState.value = newGameState
             _isGameActive.value = true
@@ -126,7 +131,8 @@ class SudokuViewModel : ViewModel() {
     fun updateElapsedTime() {
         if (_isGameActive.value) {
             val currentTime = System.currentTimeMillis()
-            _elapsedTime.value = (currentTime - gameStartTime).seconds
+            val elapsedMillis = currentTime - gameStartTime
+            _elapsedTime.value = elapsedMillis.milliseconds
         }
     }
     
@@ -159,6 +165,18 @@ class SudokuViewModel : ViewModel() {
     }
     
     /**
+     * Auto-complete the puzzle for testing purposes.
+     * This fills in all remaining cells with their correct values.
+     */
+    fun autoCompletePuzzle() {
+        if (!_isGameActive.value) return
+        
+        // Use the engine's auto-solve method which properly validates completion
+        val solvedState = sudokuEngine.autoSolvePuzzle(_gameState.value)
+        _gameState.value = solvedState
+    }
+    
+    /**
      * Get the current game statistics.
      */
     fun getGameStats(): SudokuGameStats {
@@ -179,7 +197,8 @@ class SudokuViewModel : ViewModel() {
             elapsedTime = _elapsedTime.value,
             isCompleted = currentState.isCompleted,
             isValid = currentState.isValid,
-            movesCount = currentState.moveHistory.size
+            movesCount = currentState.moveHistory.size,
+            difficulty = _difficulty.value
         )
     }
 }
@@ -195,5 +214,6 @@ data class SudokuGameStats(
     val elapsedTime: Duration,
     val isCompleted: Boolean,
     val isValid: Boolean,
-    val movesCount: Int
+    val movesCount: Int,
+    val difficulty: SudokuDifficulty
 )
